@@ -3,10 +3,18 @@ using System.Collections;
 
 public class FrogMovement : MonoBehaviour
 {
+    [Header("Ground Detection")]
+    public float minAirTime = 0.2f;
+
+    private float airTimer = 0f;
+
     [Header("Jump Settings")]
     public float jumpForce = 6f;
     public float forwardForce = 4f;
-    public float jumpCooldown = 1.5f;
+
+    [Header("Random Jump Interval")]
+    public float minJumpInterval = 1f;
+    public float maxJumpInterval = 3f;
 
     [Header("Room Reference")]
     public Transform plane;
@@ -28,7 +36,9 @@ public class FrogMovement : MonoBehaviour
     private Rigidbody rb;
     private bool isGrounded;
     private bool wasGrounded;
-    private float jumpTimer;
+
+    private bool isWaitingToJump = false;
+    private bool isJumping = false;
 
     private float roomMinX, roomMaxX, roomMinZ, roomMaxZ;
 
@@ -36,17 +46,17 @@ public class FrogMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
-        jumpTimer = jumpCooldown;
 
         CalculateBounds();
 
-        // Frog layer (no self-collision)
         gameObject.layer = LayerMask.NameToLayer("Frog");
         Physics.IgnoreLayerCollision(
             LayerMask.NameToLayer("Frog"),
             LayerMask.NameToLayer("Frog"),
             true
         );
+
+        StartCoroutine(WaitThenJump());
     }
 
     void CalculateBounds()
@@ -64,24 +74,64 @@ public class FrogMovement : MonoBehaviour
 
     void Update()
     {
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        bool groundDetected = Physics.CheckSphere(
+            groundCheck.position,
+            groundDistance,
+            groundMask
+        );
+
+        if (isJumping)
+        {
+            airTimer += Time.deltaTime;
+
+            if (airTimer < minAirTime)
+            {
+                isGrounded = false;
+            }
+            else
+            {
+                isGrounded = groundDetected;
+            }
+        }
+        else
+        {
+            isGrounded = groundDetected;
+        }
 
         // Landing detection
-        if (isGrounded && !wasGrounded)
+        if (isGrounded && !wasGrounded && isJumping)
         {
+            rb.linearVelocity = Vector3.zero;
+
+            isJumping = false;
+            airTimer = 0f;
+
             if (animator != null) animator.SetTrigger("Land");
             if (useScaleAnim) StartCoroutine(LandSquash());
+
+            if (!isWaitingToJump)
+            {
+                StartCoroutine(WaitThenJump());
+            }
         }
 
         wasGrounded = isGrounded;
+    }
 
-        jumpTimer -= Time.deltaTime;
-        if (jumpTimer <= 0f && isGrounded)
+    IEnumerator WaitThenJump()
+    {
+        isWaitingToJump = true;
+
+        float waitTime = Random.Range(minJumpInterval, maxJumpInterval);
+        yield return new WaitForSeconds(waitTime);
+
+        if (isGrounded && !isJumping)
         {
             ChooseDirection();
             Jump();
-            jumpTimer = jumpCooldown;
         }
+
+        isWaitingToJump = false;
     }
 
     void ChooseDirection()
@@ -89,10 +139,10 @@ public class FrogMovement : MonoBehaviour
         Vector3 pos = transform.position;
         float edgeBuffer = 2f;
 
-        bool nearLeft   = pos.x < roomMinX + edgeBuffer;
-        bool nearRight  = pos.x > roomMaxX - edgeBuffer;
+        bool nearLeft = pos.x < roomMinX + edgeBuffer;
+        bool nearRight = pos.x > roomMaxX - edgeBuffer;
         bool nearBottom = pos.z < roomMinZ + edgeBuffer;
-        bool nearTop    = pos.z > roomMaxZ - edgeBuffer;
+        bool nearTop = pos.z > roomMaxZ - edgeBuffer;
 
         Vector3 targetDirection;
 
@@ -100,10 +150,10 @@ public class FrogMovement : MonoBehaviour
         {
             Vector3 inward = Vector3.zero;
 
-            if (nearLeft)   inward += Vector3.right;
-            if (nearRight)  inward += Vector3.left;
+            if (nearLeft) inward += Vector3.right;
+            if (nearRight) inward += Vector3.left;
             if (nearBottom) inward += Vector3.forward;
-            if (nearTop)    inward += Vector3.back;
+            if (nearTop) inward += Vector3.back;
 
             inward.Normalize();
 
@@ -121,7 +171,6 @@ public class FrogMovement : MonoBehaviour
             targetDirection = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
         }
 
-        // Avoid other frogs (future prediction)
         Vector3 avoidance = GetAvoidanceDirection();
         targetDirection = (targetDirection + avoidance * avoidanceStrength).normalized;
 
@@ -156,8 +205,15 @@ public class FrogMovement : MonoBehaviour
 
     void Jump()
     {
-        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        rb.AddForce(transform.forward * forwardForce + Vector3.up * jumpForce, ForceMode.Impulse);
+        isJumping = true;
+        airTimer = 0f;
+
+        rb.linearVelocity = Vector3.zero;
+
+        rb.AddForce(
+            transform.forward * forwardForce + Vector3.up * jumpForce,
+            ForceMode.Impulse
+        );
 
         if (animator != null) animator.SetTrigger("Jump");
         if (useScaleAnim) StartCoroutine(JumpStretch());
@@ -184,7 +240,6 @@ public class FrogMovement : MonoBehaviour
 
     void LateUpdate()
     {
-        // Soft clamp (safety net, not primary containment)
         Vector3 pos = transform.position;
         float padding = 0.2f;
 
