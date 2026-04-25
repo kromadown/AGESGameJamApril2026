@@ -8,10 +8,10 @@ public class FrogHoverRaycast : MonoBehaviour
     private Outline currentHover;
     private Outline selected;
 
+    private FrogHoverUI currentUI;
+
     void Update()
     {
-        if (cam == null) return;
-
         HandleHover();
         HandleClick();
     }
@@ -20,30 +20,75 @@ public class FrogHoverRaycast : MonoBehaviour
     {
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
 
+        Outline newHover = null;
+        FrogHoverUI newUI = null;
+        FrogFeeding feeding = null;
+
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            Outline outline = hit.transform.GetComponentInParent<Outline>();
+            newHover = hit.transform.GetComponentInParent<Outline>();
+            newUI = hit.transform.GetComponentInParent<FrogHoverUI>();
+            feeding = hit.transform.GetComponentInParent<FrogFeeding>();
+        }
 
-            if (outline != currentHover)
+        bool isHoldingFood = FoodManager.Instance != null && FoodManager.Instance.isHoldingFood;
+
+        // =========================
+        // 🎯 OUTLINE RULES
+        // =========================
+        if (newHover != null)
+        {
+            if (!isHoldingFood)
             {
-                // turn off previous hover (but NOT if it's selected)
-                if (currentHover != null && currentHover != selected)
-                    currentHover.enabled = false;
-
-                currentHover = outline;
-
-                // turn on hover (if not already selected)
-                if (currentHover != null && currentHover != selected)
-                    currentHover.enabled = true;
+                // 🟢 BREEDING MODE → only show if ready
+                if (feeding != null && !feeding.IsReadyToMate())
+                    newHover = null;
             }
+            // 🟡 FOOD MODE → always allow hover outline
+        }
+
+        // =========================
+        // APPLY OUTLINE
+        // =========================
+        if (newHover != currentHover)
+        {
+            if (currentHover != null && currentHover != selected)
+                currentHover.enabled = false;
+
+            currentHover = newHover;
+
+            if (currentHover != null && currentHover != selected)
+                currentHover.enabled = true;
+        }
+
+        // =========================
+        // UI LOGIC (unchanged)
+        // =========================
+        if (newUI != currentUI)
+        {
+            if (currentUI != null)
+                currentUI.HideUI();
+
+            currentUI = newUI;
+
+            if (currentUI != null && isHoldingFood)
+                currentUI.ShowUI();
         }
         else
         {
-            if (currentHover != null && currentHover != selected)
+            if (currentUI != null)
             {
-                currentHover.enabled = false;
-                currentHover = null;
+                if (isHoldingFood)
+                    currentUI.ShowUI();
+                else
+                    currentUI.HideUI();
             }
+        }
+
+        if (newUI == null && currentUI != null)
+        {
+            currentUI.HideUI();
+            currentUI = null;
         }
     }
 
@@ -54,50 +99,94 @@ public class FrogHoverRaycast : MonoBehaviour
 
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
 
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        if (!Physics.Raycast(ray, out RaycastHit hit))
+            return;
+
+        Outline clicked = hit.transform.GetComponentInParent<Outline>();
+        FrogFeeding feeding = hit.transform.GetComponentInParent<FrogFeeding>();
+        FrogBreedingBox box = hit.transform.GetComponent<FrogBreedingBox>();
+
+        // =========================
+        // 📦 BREEDING BOX FIRST
+        // =========================
+        if (box != null && selected != null)
         {
-            // 🐸 CLICKED FROG
-            Outline clicked = hit.transform.GetComponentInParent<Outline>();
+            // 🚫 block if frog is not ready
+            FrogFeeding selectedFeeding = selected.GetComponent<FrogFeeding>();
 
-            if (clicked != null)
+            if (selectedFeeding != null && !selectedFeeding.IsReadyToMate())
             {
-                // clicking same frog → deselect
-                if (selected == clicked)
-                {
-                    selected.enabled = false;
-                    selected = null;
-                    return;
-                }
-
-                // deselect previous
-                if (selected != null)
-                    selected.enabled = false;
-
-                // select new
-                selected = clicked;
-                selected.enabled = true;
-
+                Debug.Log("Frog is not ready to mate yet!");
                 return;
             }
 
-            // 📦 CLICKED BREEDING BOX
-            FrogBreedingBox box = hit.transform.GetComponentInParent<FrogBreedingBox>();
+            box.PlaceSelectedFrog(selected.gameObject);
 
-            if (box != null && selected != null)
-            {
-                box.PlaceSelectedFrog(selected.gameObject);
-
-                selected = null;
-            }
+            selected.enabled = false;
+            selected = null;
+            return;
         }
-        else
+
+        // =========================
+        // 🍖 FEEDING MODE
+        // =========================
+        if (FoodManager.Instance.isHoldingFood)
         {
-            // clicked empty space → deselect
-            if (selected != null)
+            if (feeding != null)
+            {
+                feeding.Feed();
+                FoodManager.Instance.ClearFood();
+            }
+            return;
+        }
+
+        // =========================
+        // 🐸 SELECTION MODE
+        // =========================
+        if (clicked != null)
+        {
+            FrogFeeding clickedFeeding = clicked.GetComponent<FrogFeeding>();
+
+            // 🚫 BLOCK SELECTION IF NOT FULLY FED
+            if (clickedFeeding != null && !clickedFeeding.IsReadyToMate())
+            {
+                Debug.Log("This frog needs more feeding before it can be selected!");
+                return;
+            }
+
+            // toggle deselect
+            if (selected == clicked)
             {
                 selected.enabled = false;
                 selected = null;
+                return;
             }
+
+            if (selected != null)
+                selected.enabled = false;
+
+            selected = clicked;
+            selected.enabled = true;
+
+            return;
         }
+
+        // empty click
+        if (selected != null)
+        {
+            selected.enabled = false;
+            selected = null;
+        }
+    }
+
+    // 🔥 RESTORED (needed by FoodManager)
+    public void RefreshHoverUI()
+    {
+        if (currentUI == null) return;
+
+        if (FoodManager.Instance.isHoldingFood)
+            currentUI.ShowUI();
+        else
+            currentUI.HideUI();
     }
 }
