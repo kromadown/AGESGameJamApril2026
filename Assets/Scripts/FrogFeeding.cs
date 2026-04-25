@@ -5,9 +5,16 @@ public class FrogFeeding : MonoBehaviour
     public int maxFeed = 3;
     private int currentFeed = 0;
 
+    public bool hasMated = false;
+
+    public bool IsReadyToMate()
+    {
+        return currentFeed >= maxFeed && !hasMated;
+    }
+
     public bool CanBeFed()
     {
-        return currentFeed < maxFeed;
+        return currentFeed < maxFeed && !hasMated;
     }
 
     public void Feed()
@@ -16,12 +23,7 @@ public class FrogFeeding : MonoBehaviour
 
         currentFeed++;
 
-        Debug.Log(name + " fed! (" + currentFeed + "/" + maxFeed + ")");
-
-        if (currentFeed >= maxFeed)
-        {
-            Debug.Log(name + " is full!");
-        }
+        Debug.Log(name + " fed " + currentFeed + "/" + maxFeed);
     }
 
     public int GetFeedCount()
