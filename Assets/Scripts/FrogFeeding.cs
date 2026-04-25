@@ -6,6 +6,7 @@ public class FrogFeeding : MonoBehaviour
     private int currentFeed = 0;
 
     public bool hasMated = false;
+    public System.Action OnFeedChanged;
 
     public bool IsReadyToMate()
     {
@@ -24,6 +25,8 @@ public class FrogFeeding : MonoBehaviour
         currentFeed++;
 
         Debug.Log(name + " fed " + currentFeed + "/" + maxFeed);
+
+        OnFeedChanged?.Invoke();
     }
 
     public int GetFeedCount()

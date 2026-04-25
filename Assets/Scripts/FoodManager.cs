@@ -6,12 +6,12 @@ public class FoodManager : MonoBehaviour
 
     public bool isHoldingFood = false;
 
-    [Header("Cursor Settings")]
     public Texture2D normalCursor;
     public Texture2D foodCursor;
 
-    [Header("Cursor Hotspot (click point)")]
     public Vector2 hotspot = Vector2.zero;
+
+    private FrogHoverRaycast hoverRaycast;
 
     void Awake()
     {
@@ -20,20 +20,24 @@ public class FoodManager : MonoBehaviour
 
     void Start()
     {
+        hoverRaycast = FindFirstObjectByType<FrogHoverRaycast>();
         SetNormalCursor();
     }
 
     public void SelectFood()
     {
         isHoldingFood = true;
-        Debug.Log("FOOD SELECTED");
         SetFoodCursor();
+
+        hoverRaycast?.RefreshHoverUI();
     }
 
     public void ClearFood()
     {
         isHoldingFood = false;
         SetNormalCursor();
+
+        hoverRaycast?.RefreshHoverUI();
     }
 
     void SetFoodCursor()

@@ -6,20 +6,23 @@ public class FrogHoverUI : MonoBehaviour
     public GameObject canvas;
     public TextMeshProUGUI hoverText;
 
-    private FrogFeeding feeding;
-    private Camera cam;
+    FrogFeeding feeding;
+    Camera cam;
 
     void Start()
     {
         feeding = GetComponent<FrogFeeding>();
         cam = Camera.main;
-
         canvas.SetActive(false);
     }
 
     public void ShowUI()
     {
-        if (!FoodManager.Instance.isHoldingFood) return;
+        if (FoodManager.Instance == null || !FoodManager.Instance.isHoldingFood)
+            {
+                canvas.SetActive(false);
+                return;
+            }
 
         canvas.SetActive(true);
         UpdateText();
@@ -30,12 +33,13 @@ public class FrogHoverUI : MonoBehaviour
         canvas.SetActive(false);
     }
 
-    void Update()
+    public void Refresh()
     {
-        FaceCamera();
+        if (canvas.activeSelf)
+            UpdateText();
     }
 
-    void FaceCamera()
+    void Update()
     {
         if (!canvas.activeSelf || cam == null) return;
 
@@ -48,7 +52,7 @@ public class FrogHoverUI : MonoBehaviour
     void UpdateText()
     {
         if (feeding.CanBeFed())
-            hoverText.text = "Feed (" + feeding.GetFeedCount() + "/3)";
+            hoverText.text = $"Feed ({feeding.GetFeedCount()}/{feeding.maxFeed})";
         else
             hoverText.text = "Full!";
     }

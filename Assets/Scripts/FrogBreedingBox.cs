@@ -59,7 +59,8 @@ public class FrogBreedingBox : MonoBehaviour
             return;
         }
 
-        Instantiate(combo.resultPrefab, spawnPoint.position, Quaternion.identity);
+        Vector3 spawnPos = spawnPoint.position + Vector3.up * 0.5f;
+        Instantiate(combo.resultPrefab, spawnPos, Quaternion.identity);
 
         ResetBox();
     }
@@ -86,8 +87,15 @@ public class FrogBreedingBox : MonoBehaviour
         if (outline != null)
             outline.enabled = false;
 
-        Vector3 spawnPos = FindSafePosition(index);
+        var feeding = frog.GetComponent<FrogFeeding>();
+        if (feeding != null)
+            feeding.hasMated = false;
 
+        var hoverUI = frog.GetComponent<FrogHoverUI>();
+        if (hoverUI != null)
+            hoverUI.HideUI();
+
+        Vector3 spawnPos = FindSafePosition(index, frog);
         frog.transform.position = spawnPos;
 
         Rigidbody rb = frog.GetComponent<Rigidbody>();
@@ -99,37 +107,53 @@ public class FrogBreedingBox : MonoBehaviour
         }
     }
 
-    Vector3 FindSafePosition(int index)
+    Vector3 FindSafePosition(int index, GameObject frog)
     {
-        int attempts = 10;
+        int attempts = 20;
 
         for (int i = 0; i < attempts; i++)
         {
-            float angle = (index * 140f) + Random.Range(-30f, 30f);
-            float radius = Random.Range(boxClearanceRadius, returnRadius);
+            // 🔥 each frog gets its OWN sector (prevents clustering)
+            float baseAngle = index == 0 ? 0f : 180f;
 
-            Vector3 dir = new Vector3(
+            float angle = baseAngle + Random.Range(-60f, 60f);
+
+            Vector3 direction = new Vector3(
                 Mathf.Cos(angle * Mathf.Deg2Rad),
                 0,
                 Mathf.Sin(angle * Mathf.Deg2Rad)
             );
 
-            Vector3 pos = transform.position + dir * radius;
+            // 🔥 enforce MIN distance from box
+            float minDistanceFromBox = boxClearanceRadius + 2.5f;
+            float maxDistanceFromBox = returnRadius + 6f;
 
-            // ❌ avoid spawning inside box or obstacles
-            if (Physics.CheckSphere(pos, 0.6f, obstacleMask))
+            float distance = Random.Range(minDistanceFromBox, maxDistanceFromBox);
+
+            Vector3 candidate = transform.position + direction * distance;
+
+            // ❌ avoid obstacles
+            if (Physics.CheckSphere(candidate, 0.6f, obstacleMask))
+                continue;
+
+            // ❌ avoid spawning too close to box center
+            if (Vector3.Distance(candidate, transform.position) < minDistanceFromBox)
                 continue;
 
             // ground snap
-            if (Physics.Raycast(pos + Vector3.up * 5f, Vector3.down, out RaycastHit hit))
+            if (Physics.Raycast(candidate + Vector3.up * 5f, Vector3.down, out RaycastHit hit))
             {
-                pos = hit.point;
+                candidate = hit.point;
             }
 
-            return pos;
+            // slight lift to prevent physics jitter
+            candidate.y += 0.1f;
+
+            return candidate;
         }
 
-        // fallback (never inside box)
-        return transform.position + transform.right * (returnRadius + 2f);
+        // 🔥 fallback guaranteed safe opposite sides
+        Vector3 fallbackDir = (index == 0 ? Vector3.right : Vector3.left);
+        return transform.position + fallbackDir * (returnRadius + 5f);
     }
 }
