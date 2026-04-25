@@ -147,9 +147,8 @@ GameObject:
   - component: {fileID: 1216587519558716821}
   - component: {fileID: 2518644495610527649}
   - component: {fileID: 956791558704338114}
-  - component: {fileID: 8571015403458089681}
-  - component: {fileID: 1427732477572041123}
-  - component: {fileID: 3242520890326878340}
+  - component: {fileID: -7657902382719025807}
+  - component: {fileID: 4408208024377301572}
   m_Layer: 7
   m_Name: Frog A
   m_TagString: Untagged
@@ -293,21 +292,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60eaddd15ed54d246918050c6e5148a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrogMovement
-  isMatingLocked: 0
+  minAirTime: 0.2
   jumpForce: 6
   forwardForce: 4
+  turnDuration: 0.2
   minJumpInterval: 1
   maxJumpInterval: 3
+  plane: {fileID: 0}
   groundCheck: {fileID: 1349589916001193828}
   groundDistance: 0.3
   groundMask:
     serializedVersion: 2
     m_Bits: 64
-  moveToMatingPoint: 0
-  matingPoint: {x: 0, y: 0, z: 0}
-  stopDistance: 1.5
-  hopCooldown: 0.7
---- !u!114 &8571015403458089681
+  frogModel: {fileID: 0}
+  animator: {fileID: 0}
+  useScaleAnim: 1
+  neighborRadius: 2.5
+  avoidanceStrength: 1.5
+  frogMask:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!114 &-7657902382719025807
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -316,39 +321,27 @@ MonoBehaviour:
   m_GameObject: {fileID: 6098371603524771816}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3f41d9c537701b840ad50bfafe32f0e3, type: 3}
+  m_Script: {fileID: 11500000, guid: e6173a8d96470334ca26d0a125f4e010, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FrogFeeding
-  maxFeed: 3
-  hasMated: 0
---- !u!114 &1427732477572041123
+  m_EditorClassIdentifier: Assembly-CSharp::FrogSelectable
+--- !u!114 &4408208024377301572
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6098371603524771816}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d1e3dddb363e5246b790042acc18868, type: 3}
+  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FrogHoverUI
-  canvas: {fileID: 6018727547533525931}
-  hoverText: {fileID: 2565030153528790382}
---- !u!114 &3242520890326878340
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6098371603524771816}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3dc20a9309f0bde47868ff1a6bb1634e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FrogMating
-  loveUIPrefab: {fileID: 2432870272422832556, guid: fe8b57896bd784a40a4cd209d693a520, type: 3}
-  frogType: 0
+  m_EditorClassIdentifier: Assembly-CSharp::Outline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
 --- !u!1 &8229331325732498036
 GameObject:
   m_ObjectHideFlags: 0

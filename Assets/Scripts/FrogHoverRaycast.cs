@@ -1,43 +1,103 @@
 using UnityEngine;
-using TMPro;
+using UnityEngine.InputSystem;
 
 public class FrogHoverRaycast : MonoBehaviour
 {
     public Camera cam;
 
-    private FrogHoverUI currentHover;
+    private Outline currentHover;
+    private Outline selected;
 
     void Update()
     {
-        Ray ray = cam.ScreenPointToRay(MousePosition());
+        if (cam == null) return;
+
+        HandleHover();
+        HandleClick();
+    }
+
+    void HandleHover()
+    {
+        Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
 
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            FrogHoverUI hover = hit.collider.GetComponentInParent<FrogHoverUI>();
+            Outline outline = hit.transform.GetComponentInParent<Outline>();
 
-            if (hover != currentHover)
+            if (outline != currentHover)
             {
-                if (currentHover != null)
-                    currentHover.HideUI();
+                // turn off previous hover (but NOT if it's selected)
+                if (currentHover != null && currentHover != selected)
+                    currentHover.enabled = false;
 
-                currentHover = hover;
+                currentHover = outline;
 
-                if (currentHover != null)
-                    currentHover.ShowUI();
+                // turn on hover (if not already selected)
+                if (currentHover != null && currentHover != selected)
+                    currentHover.enabled = true;
             }
         }
         else
         {
-            if (currentHover != null)
+            if (currentHover != null && currentHover != selected)
             {
-                currentHover.HideUI();
+                currentHover.enabled = false;
                 currentHover = null;
             }
         }
     }
 
-    Vector2 MousePosition()
+    void HandleClick()
     {
-        return UnityEngine.InputSystem.Mouse.current.position.ReadValue();
+        if (!Mouse.current.leftButton.wasPressedThisFrame)
+            return;
+
+        Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
+
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            // 🐸 CLICKED FROG
+            Outline clicked = hit.transform.GetComponentInParent<Outline>();
+
+            if (clicked != null)
+            {
+                // clicking same frog → deselect
+                if (selected == clicked)
+                {
+                    selected.enabled = false;
+                    selected = null;
+                    return;
+                }
+
+                // deselect previous
+                if (selected != null)
+                    selected.enabled = false;
+
+                // select new
+                selected = clicked;
+                selected.enabled = true;
+
+                return;
+            }
+
+            // 📦 CLICKED BREEDING BOX
+            FrogBreedingBox box = hit.transform.GetComponentInParent<FrogBreedingBox>();
+
+            if (box != null && selected != null)
+            {
+                box.PlaceSelectedFrog(selected.gameObject);
+
+                selected = null;
+            }
+        }
+        else
+        {
+            // clicked empty space → deselect
+            if (selected != null)
+            {
+                selected.enabled = false;
+                selected = null;
+            }
+        }
     }
 }

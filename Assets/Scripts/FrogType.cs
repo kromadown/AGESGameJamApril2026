@@ -2,5 +2,8 @@ public enum FrogType
 {
     A,
     B,
-    C
+    C,
+    AB,
+    AC,
+    BC
 }

@@ -5,7 +5,6 @@ public class FrogMovement : MonoBehaviour
 {
     [Header("Ground Detection")]
     public float minAirTime = 0.2f;
-
     private float airTimer = 0f;
 
     [Header("Jump Settings")]
@@ -55,14 +54,27 @@ public class FrogMovement : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
 
+        // Auto-find plane (for prefabs)
+        if (plane == null)
+        {
+            GameObject found = GameObject.FindGameObjectWithTag("Ground");
+
+            if (found != null)
+                plane = found.transform;
+            else
+                Debug.LogError("No GameObject with tag 'Ground' found for FrogMovement!");
+        }
+
         if (frogModel == null)
             frogModel = transform;
 
         originalScale = frogModel.localScale;
 
-        CalculateBounds();
+        if (plane != null)
+            CalculateBounds();
 
         gameObject.layer = LayerMask.NameToLayer("Frog");
+
         Physics.IgnoreLayerCollision(
             LayerMask.NameToLayer("Frog"),
             LayerMask.NameToLayer("Frog"),
@@ -72,8 +84,25 @@ public class FrogMovement : MonoBehaviour
         StartCoroutine(WaitThenJump());
     }
 
+    // âœ… THIS IS THE IMPORTANT ADDITION
+    void OnEnable()
+    {
+        // Reset movement state
+        isJumping = false;
+        isWaitingToJump = false;
+        airTimer = 0f;
+
+        // Restart jumping loop
+        StopAllCoroutines();
+
+        if (gameObject.activeInHierarchy)
+            StartCoroutine(WaitThenJump());
+    }
+
     void CalculateBounds()
     {
+        if (plane == null) return;
+
         float width = plane.localScale.x * 10f;
         float length = plane.localScale.z * 10f;
 
@@ -98,20 +127,15 @@ public class FrogMovement : MonoBehaviour
             airTimer += Time.deltaTime;
 
             if (airTimer < minAirTime)
-            {
                 isGrounded = false;
-            }
             else
-            {
                 isGrounded = groundDetected;
-            }
         }
         else
         {
             isGrounded = groundDetected;
         }
 
-        // Landing detection
         if (isGrounded && !wasGrounded && isJumping)
         {
             rb.linearVelocity = Vector3.zero;
@@ -123,9 +147,7 @@ public class FrogMovement : MonoBehaviour
             if (useScaleAnim) StartCoroutine(LandSquash());
 
             if (!isWaitingToJump)
-            {
                 StartCoroutine(WaitThenJump());
-            }
         }
 
         wasGrounded = isGrounded;
@@ -197,9 +219,6 @@ public class FrogMovement : MonoBehaviour
             yield break;
 
         Quaternion startRot = transform.rotation;
-
-        // LookRotation Ä¬ÈÏÈÃ Z Õý·½Ïò³¯ÏòÄ¿±ê¡£
-        // ÄãÒªÈÃ Z ¸º·½Ïò³¯ÏòÌøÔ¾·½Ïò£¬ËùÒÔÕâÀïÓÃ -jumpDirection¡£
         Quaternion targetRot = Quaternion.LookRotation(-jumpDirection, Vector3.up);
 
         float time = 0f;
@@ -207,11 +226,8 @@ public class FrogMovement : MonoBehaviour
         while (time < turnDuration)
         {
             time += Time.deltaTime;
-            float t = time / turnDuration;
-            t = Mathf.SmoothStep(0f, 1f, t);
-
+            float t = Mathf.SmoothStep(0f, 1f, time / turnDuration);
             transform.rotation = Quaternion.Slerp(startRot, targetRot, t);
-
             yield return null;
         }
 
@@ -232,10 +248,9 @@ public class FrogMovement : MonoBehaviour
             if (otherRb == null) continue;
 
             Vector3 futurePos = col.transform.position + otherRb.linearVelocity * 0.5f;
-
             Vector3 away = transform.position - futurePos;
-            float dist = away.magnitude;
 
+            float dist = away.magnitude;
             if (dist > 0.01f)
                 avoidance += away.normalized / dist;
         }
@@ -295,6 +310,8 @@ public class FrogMovement : MonoBehaviour
 
     void LateUpdate()
     {
+        if (plane == null) return;
+
         Vector3 pos = transform.position;
         float padding = 0.2f;
 
