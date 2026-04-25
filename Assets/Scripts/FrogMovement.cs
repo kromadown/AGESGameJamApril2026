@@ -12,6 +12,9 @@ public class FrogMovement : MonoBehaviour
     public float jumpForce = 6f;
     public float forwardForce = 4f;
 
+    [Header("Turn Settings")]
+    public float turnDuration = 0.2f;
+
     [Header("Random Jump Interval")]
     public float minJumpInterval = 1f;
     public float maxJumpInterval = 3f;
@@ -23,6 +26,11 @@ public class FrogMovement : MonoBehaviour
     public Transform groundCheck;
     public float groundDistance = 0.3f;
     public LayerMask groundMask;
+
+    [Header("Visual Model")]
+    public Transform frogModel;
+
+    private Vector3 originalScale;
 
     [Header("Animation")]
     public Animator animator;
@@ -46,6 +54,11 @@ public class FrogMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+
+        if (frogModel == null)
+            frogModel = transform;
+
+        originalScale = frogModel.localScale;
 
         CalculateBounds();
 
@@ -127,14 +140,15 @@ public class FrogMovement : MonoBehaviour
 
         if (isGrounded && !isJumping)
         {
-            ChooseDirection();
+            Vector3 jumpDirection = ChooseDirection();
+            yield return StartCoroutine(TurnToDirection(jumpDirection));
             Jump();
         }
 
         isWaitingToJump = false;
     }
 
-    void ChooseDirection()
+    Vector3 ChooseDirection()
     {
         Vector3 pos = transform.position;
         float edgeBuffer = 2f;
@@ -174,8 +188,34 @@ public class FrogMovement : MonoBehaviour
         Vector3 avoidance = GetAvoidanceDirection();
         targetDirection = (targetDirection + avoidance * avoidanceStrength).normalized;
 
-        if (targetDirection != Vector3.zero)
-            transform.rotation = Quaternion.LookRotation(targetDirection);
+        return targetDirection;
+    }
+
+    IEnumerator TurnToDirection(Vector3 jumpDirection)
+    {
+        if (jumpDirection == Vector3.zero)
+            yield break;
+
+        Quaternion startRot = transform.rotation;
+
+        // LookRotation 默认让 Z 正方向朝向目标。
+        // 你要让 Z 负方向朝向跳跃方向，所以这里用 -jumpDirection。
+        Quaternion targetRot = Quaternion.LookRotation(-jumpDirection, Vector3.up);
+
+        float time = 0f;
+
+        while (time < turnDuration)
+        {
+            time += Time.deltaTime;
+            float t = time / turnDuration;
+            t = Mathf.SmoothStep(0f, 1f, t);
+
+            transform.rotation = Quaternion.Slerp(startRot, targetRot, t);
+
+            yield return null;
+        }
+
+        transform.rotation = targetRot;
     }
 
     Vector3 GetAvoidanceDirection()
@@ -211,7 +251,7 @@ public class FrogMovement : MonoBehaviour
         rb.linearVelocity = Vector3.zero;
 
         rb.AddForce(
-            transform.forward * forwardForce + Vector3.up * jumpForce,
+            -transform.forward * forwardForce + Vector3.up * jumpForce,
             ForceMode.Impulse
         );
 
@@ -221,21 +261,36 @@ public class FrogMovement : MonoBehaviour
 
     IEnumerator JumpStretch()
     {
-        transform.localScale = new Vector3(1.3f, 0.6f, 1.3f);
+        frogModel.localScale = new Vector3(
+            originalScale.x * 1.3f,
+            originalScale.y * 0.6f,
+            originalScale.z * 1.3f
+        );
+
         yield return new WaitForSeconds(0.05f);
 
-        transform.localScale = new Vector3(0.7f, 1.4f, 0.7f);
+        frogModel.localScale = new Vector3(
+            originalScale.x * 0.7f,
+            originalScale.y * 1.4f,
+            originalScale.z * 0.7f
+        );
+
         yield return new WaitForSeconds(0.15f);
 
-        transform.localScale = Vector3.one;
+        frogModel.localScale = originalScale;
     }
 
     IEnumerator LandSquash()
     {
-        transform.localScale = new Vector3(1.4f, 0.6f, 1.4f);
+        frogModel.localScale = new Vector3(
+            originalScale.x * 1.4f,
+            originalScale.y * 0.6f,
+            originalScale.z * 1.4f
+        );
+
         yield return new WaitForSeconds(0.08f);
 
-        transform.localScale = Vector3.one;
+        frogModel.localScale = originalScale;
     }
 
     void LateUpdate()
