@@ -56,6 +56,8 @@ public class FrogMovement : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
 
+        animator.SetBool("isJumping", false);
+
         if (frogModel == null)
             frogModel = transform;
 
@@ -105,11 +107,13 @@ public class FrogMovement : MonoBehaviour
             else
             {
                 isGrounded = groundDetected;
+                animator.SetBool("isJumping", false);
             }
         }
         else
         {
             isGrounded = groundDetected;
+            //animator.SetBool("isJumping", false);
         }
 
         // Landing detection
@@ -120,7 +124,7 @@ public class FrogMovement : MonoBehaviour
             isJumping = false;
             airTimer = 0f;
 
-            if (animator != null) animator.SetTrigger("Land");
+            //if (animator != null) animator.SetTrigger("Land");
             if (useScaleAnim) StartCoroutine(LandSquash());
 
             if (!isWaitingToJump)
@@ -266,7 +270,7 @@ public class FrogMovement : MonoBehaviour
             ForceMode.Impulse
         );
 
-        if (animator != null) animator.SetTrigger("Jump");
+        if (animator != null) animator.SetBool("isJumping", true);
         if (useScaleAnim) StartCoroutine(JumpStretch());
     }
 
