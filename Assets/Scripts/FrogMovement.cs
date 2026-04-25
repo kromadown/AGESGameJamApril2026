@@ -47,13 +47,14 @@ public class FrogMovement : MonoBehaviour
 
     private bool isWaitingToJump = false;
     private bool isJumping = false;
+    private Vector3 currentJumpDirection;
 
     private float roomMinX, roomMaxX, roomMinZ, roomMaxZ;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.freezeRotation = true;
+        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
 
         if (frogModel == null)
             frogModel = transform;
@@ -140,8 +141,12 @@ public class FrogMovement : MonoBehaviour
 
         if (isGrounded && !isJumping)
         {
-            Vector3 jumpDirection = ChooseDirection();
-            yield return StartCoroutine(TurnToDirection(jumpDirection));
+            currentJumpDirection = ChooseDirection();
+            currentJumpDirection.y = 0f;
+            currentJumpDirection.Normalize();
+
+            yield return StartCoroutine(TurnToDirection(currentJumpDirection));
+
             Jump();
         }
 
@@ -196,26 +201,31 @@ public class FrogMovement : MonoBehaviour
         if (jumpDirection == Vector3.zero)
             yield break;
 
-        Quaternion startRot = transform.rotation;
+        jumpDirection.y = 0f;
+        jumpDirection.Normalize();
 
-        // LookRotation 默认让 Z 正方向朝向目标。
-        // 你要让 Z 负方向朝向跳跃方向，所以这里用 -jumpDirection。
+        Quaternion startRot = rb.rotation;
+
+        // 让 FrogRoot 的 Z轴负方向 朝向 jumpDirection
         Quaternion targetRot = Quaternion.LookRotation(-jumpDirection, Vector3.up);
 
         float time = 0f;
 
         while (time < turnDuration)
         {
-            time += Time.deltaTime;
+            time += Time.fixedDeltaTime;
+
             float t = time / turnDuration;
             t = Mathf.SmoothStep(0f, 1f, t);
 
-            transform.rotation = Quaternion.Slerp(startRot, targetRot, t);
+            Quaternion newRot = Quaternion.Slerp(startRot, targetRot, t);
 
-            yield return null;
+            rb.MoveRotation(newRot);
+
+            yield return new WaitForFixedUpdate();
         }
 
-        transform.rotation = targetRot;
+        rb.MoveRotation(targetRot);
     }
 
     Vector3 GetAvoidanceDirection()
@@ -249,9 +259,10 @@ public class FrogMovement : MonoBehaviour
         airTimer = 0f;
 
         rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
 
         rb.AddForce(
-            -transform.forward * forwardForce + Vector3.up * jumpForce,
+            currentJumpDirection * forwardForce + Vector3.up * jumpForce,
             ForceMode.Impulse
         );
 
