@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class FrogBreedingBox : MonoBehaviour
 {
@@ -12,15 +13,25 @@ public class FrogBreedingBox : MonoBehaviour
     public float boxClearanceRadius = 2.0f;
     public LayerMask obstacleMask;
 
+    [Header("Animation Timing")]
+    public float matingAnimDuration = 2f;
+
     private GameObject slotA;
     private GameObject slotB;
+
+    private bool isBreeding = false;
 
     private FrogType typeA;
     private FrogType typeB;
 
+    public Animator boxAnimator;
+
     public void PlaceSelectedFrog(GameObject frog)
     {
         if (frog == null) return;
+
+        // 繁殖动画期间，不允许再放新的青蛙
+        if (isBreeding) return;
 
         FrogIdentity id = frog.GetComponent<FrogIdentity>();
         if (id == null)
@@ -37,6 +48,18 @@ public class FrogBreedingBox : MonoBehaviour
             return;
 
         TryBreed();
+    }
+
+    void Awake()
+    {
+        isBreeding = false;
+        slotA = null;
+        slotB = null;
+
+        if (boxAnimator != null)
+        {
+            boxAnimator.SetBool("isMating", false);
+        }
     }
 
     void StoreFrog(ref GameObject slot, ref FrogType type, GameObject frog, FrogType frogType)
@@ -59,10 +82,31 @@ public class FrogBreedingBox : MonoBehaviour
             return;
         }
 
+        StartCoroutine(BreedSequence(combo.resultPrefab));
+    }
+
+    IEnumerator BreedSequence(GameObject resultPrefab)
+    {
+        isBreeding = true;
+
+        if (boxAnimator != null)
+        {
+            boxAnimator.SetBool("isMating", true);
+        }
+
+        yield return new WaitForSeconds(matingAnimDuration);
+
         Vector3 spawnPos = spawnPoint.position + Vector3.up * 0.5f;
-        Instantiate(combo.resultPrefab, spawnPos, Quaternion.identity);
+        Instantiate(resultPrefab, spawnPos, Quaternion.identity);
+
+        if (boxAnimator != null)
+        {
+            boxAnimator.SetBool("isMating", false);
+        }
 
         ResetBox();
+
+        isBreeding = false;
     }
 
     void ResetBox()
