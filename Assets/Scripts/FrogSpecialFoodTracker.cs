@@ -2,56 +2,67 @@ using UnityEngine;
 
 public class FrogSpecialFoodTracker : MonoBehaviour
 {
-    public int foodACount;
-    public int foodBCount;
-    public int foodCCount;
+    private FrogIdentity identity;
 
-    public int requiredAmount = 4;
+    private int foodA;
+    private int foodB;
+    private int foodC;
+
+    private const int requiredAmount = 4;
+
+    void Awake()
+    {
+        identity = GetComponent<FrogIdentity>();
+    }
 
     public void AddFood(FrogType foodType)
     {
-        FrogIdentity id = GetComponent<FrogIdentity>();
-        if (id == null) return;
+        if (identity == null) return;
 
         switch (foodType)
         {
-            case FrogType.A:
-                foodACount++;
-                if (IsABorAC(id.frogType) && foodACount >= requiredAmount)
-                    TriggerSpecial("A");
-                break;
+            case FrogType.A: foodA++; break;
+            case FrogType.B: foodB++; break;
+            case FrogType.C: foodC++; break;
+        }
 
-            case FrogType.B:
-                foodBCount++;
-                if (IsABorBC(id.frogType) && foodBCount >= requiredAmount)
-                    TriggerSpecial("B");
-                break;
+        Debug.Log($"[Tracker] {name} received {foodType}");
 
-            case FrogType.C:
-                foodCCount++;
-                if (IsACorBC(id.frogType) && foodCCount >= requiredAmount)
-                    TriggerSpecial("C");
-                break;
+        CheckUnlock(foodType);
+    }
+
+    void CheckUnlock(FrogType foodType)
+    {
+        int count = GetFoodCount(foodType);
+
+        if (count >= requiredAmount)
+        {
+            Debug.Log($"🔥 THRESHOLD REACHED: {identity.frogType} + {foodType}");
+
+            FrogUnlockManager.Instance.TryUnlock(identity.frogType, foodType);
+
+            ResetFood(foodType);
         }
     }
 
-    bool IsABorAC(FrogType type)
+    int GetFoodCount(FrogType type)
     {
-        return type == FrogType.AB || type == FrogType.AC;
+        return type switch
+        {
+            FrogType.A => foodA,
+            FrogType.B => foodB,
+            FrogType.C => foodC,
+            _ => 0
+        };
     }
 
-    bool IsABorBC(FrogType type)
+    void ResetFood(FrogType type)
     {
-        return type == FrogType.AB || type == FrogType.BC;
-    }
-
-    bool IsACorBC(FrogType type)
-    {
-        return type == FrogType.AC || type == FrogType.BC;
-    }
-
-    void TriggerSpecial(string foodType)
-    {
-        Debug.Log($"[SPECIAL TRIGGER] Frog {name} activated for Food {foodType}");
+        switch (type)
+        {
+            case FrogType.A: foodA = 0; break;
+            case FrogType.B: foodB = 0; break;
+            case FrogType.C: foodC = 0; break;
+        }
     }
 }

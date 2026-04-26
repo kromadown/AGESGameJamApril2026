@@ -26,10 +26,13 @@ public class FrogFeeding : MonoBehaviour
     private int specialStreak = 0;
 
     private const int specialLimit = 4;
+    private FrogSpecialFoodTracker tracker;
 
     void Start()
     {
         GameObject found = GameObject.Find(giftSpawnPointName);
+
+        tracker = GetComponent<FrogSpecialFoodTracker>();
 
         if (found != null)
             giftSpawnPoint = found.transform;
@@ -102,7 +105,13 @@ public class FrogFeeding : MonoBehaviour
 
         if (specialStreak >= specialLimit)
         {
-            TriggerSpecialEffect(type);
+            Debug.Log($"🔥 SPECIAL FOOD {type} TRIGGERED ON {GetComponent<FrogIdentity>().frogType}");
+
+            FrogUnlockManager.Instance.TryUnlock(
+                GetComponent<FrogIdentity>().frogType,
+                type
+            );
+
             specialStreak = 0;
         }
     }
@@ -112,7 +121,16 @@ public class FrogFeeding : MonoBehaviour
     // =========================
     void TriggerSpecialEffect(FrogType type)
     {
-        Debug.Log($"🔥 SPECIAL FOOD {type} REACHED 6 CONSECUTIVE FEEDS → SPECIAL EVENT TRIGGERED");
+        Debug.Log($"🔥 SPECIAL FOOD {type} REACHED 4 CONSECUTIVE FEEDS → SPECIAL EVENT TRIGGERED");
+
+        if (tracker != null)
+        {
+            tracker.AddFood(type);
+        }
+        else
+        {
+            Debug.LogWarning("[Special Feed] No FrogSpecialFoodTracker found!");
+        }
     }
 
     // =========================
