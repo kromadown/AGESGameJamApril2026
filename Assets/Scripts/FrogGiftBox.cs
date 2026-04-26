@@ -9,36 +9,22 @@ public class FrogGiftBox : MonoBehaviour
     public void Init(FrogIdentity source)
     {
         giver = source;
-        Debug.Log($"GiftBox initialized by: {giver.frogType}");
     }
 
     public void Open()
     {
-        if (opened)
-        {
-            Debug.Log("GiftBox already opened");
-            return;
-        }
+        Debug.Log("OPEN CALLED! Frame: " + Time.frameCount);
+        Debug.Log("CALL STACK:\n" + System.Environment.StackTrace);
 
+        if (opened) return;
         opened = true;
-
-        Debug.Log("GiftBox clicked!");
 
         FrogGiftSystem system = FindFirstObjectByType<FrogGiftSystem>();
 
-        if (system == null)
+        if (system != null && giver != null)
         {
-            Debug.LogError("No FrogGiftSystem found in scene!");
-            return;
+            system.GiveGift(giver, transform.position);
         }
-
-        if (giver == null)
-        {
-            Debug.LogError("GiftBox has no giver assigned!");
-            return;
-        }
-
-        system.GiveGift(giver, transform.position);
 
         Destroy(gameObject);
     }

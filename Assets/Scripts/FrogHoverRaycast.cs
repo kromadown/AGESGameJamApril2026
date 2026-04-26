@@ -92,6 +92,9 @@ public class FrogHoverRaycast : MonoBehaviour
 
     void HandleClick()
     {
+        if (!Mouse.current.leftButton.wasPressedThisFrame)
+            return;
+
         // ❗ MUST raycast first
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
 
@@ -101,22 +104,36 @@ public class FrogHoverRaycast : MonoBehaviour
         // =========================
         // 🎁 GIFT BOX CLICK (FIRST PRIORITY)
         // =========================
-        FrogGiftBox gift = hit.transform.GetComponentInParent<FrogGiftBox>();
-
-        if (gift != null)
+        if (hit.transform.CompareTag("Gift"))
         {
-            Debug.Log("GiftBox clicked");
-            gift.Open();
+            FrogGiftBox gift = hit.transform.GetComponentInParent<FrogGiftBox>();
+
+            if (gift != null)
+            {
+                Debug.Log("Gift clicked (TAG SYSTEM)");
+                gift.Open();
+            }
+
             return;
         }
 
         // =========================
         // BASIC COMPONENTS
         // =========================
-        if (!Mouse.current.leftButton.wasPressedThisFrame)
-            return;
 
-        Outline clicked = hit.transform.GetComponentInParent<Outline>();
+        Outline clicked = null;
+
+        if (hit.transform.CompareTag("Gift"))
+        {
+            FrogGiftBox gift = hit.transform.GetComponentInParent<FrogGiftBox>();
+
+            if (gift != null)
+            {
+                gift.Open();
+            }
+
+            return;
+        }
         FrogFeeding feeding = hit.transform.GetComponentInParent<FrogFeeding>();
         FrogBreedingBox box = hit.transform.GetComponentInParent<FrogBreedingBox>();
         FrogIdentity frog = hit.transform.GetComponentInParent<FrogIdentity>();
