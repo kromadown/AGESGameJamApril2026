@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - Ground
+  - Gift
   layers:
   - Default
   - TransparentFX
