@@ -1,21 +1,111 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using Unity.VisualScripting;
+using UnityEditor.Rendering.LookDev;
+using UnityEngine.SceneManagement;
 
-public class AngleManager : MonoBehaviour
+public class UIManager : MonoBehaviour
 {
     public Transform center;
     public Button turnRight;
     public Button turnLeft;
 
+    public Button pause;
+    public Button resume;
+    public Button mainMenu;
+
+    public Animator pauseMenu;
+
     public float rotateDuration = 0.3f;
 
     private bool isRotating = false;
+
+    [Header("Scene")]
+    public string sceneName = "GameScene";
+
+    [Header("Fade")]
+    public Image fadePanel;
+    public float fadeDuration = 1f;
 
     void Start()
     {
         turnRight.onClick.AddListener(() => Rotate(-90));
         turnLeft.onClick.AddListener(() => Rotate(90));
+        pause.onClick.AddListener(Pause);
+        resume.onClick.AddListener(Resume);
+        mainMenu.onClick.AddListener(MainMenu);
+
+        resume.interactable = false;
+        mainMenu.interactable = false;
+    }
+
+    void Pause()
+    {
+        turnRight.interactable = false;
+        turnLeft.interactable = false;
+        pause.interactable = false;
+
+        resume.interactable = true;
+        mainMenu.interactable = true;
+
+        pauseMenu.SetBool("Paused", true);
+    }
+
+    void Resume()
+    {
+        turnRight.interactable = true;
+        turnLeft.interactable = true;
+        pause.interactable = true;
+
+        resume.interactable = false;
+        mainMenu.interactable = false;
+
+        pauseMenu.SetBool("Paused", false);
+        pauseMenu.SetTrigger("Resumed");
+    }
+
+    void MainMenu()
+    {
+        resume.interactable = false;
+        mainMenu.interactable = false;
+        turnRight.interactable = false;
+        turnLeft.interactable = false;
+        pause.interactable = false;
+
+        StartCoroutine(StartGameSequence());
+    }
+
+    IEnumerator StartGameSequence()
+    {
+        yield return StartCoroutine(FadeOut());
+
+        SceneManager.LoadScene(sceneName);
+    }
+
+    IEnumerator FadeOut()
+    {
+        float time = 0f;
+
+        while (time < fadeDuration)
+        {
+            time += Time.deltaTime;
+            float t = time / fadeDuration;
+
+            SetFadeAlpha(t);
+
+            yield return null;
+        }
+        SetFadeAlpha(1f);
+    }
+
+    void SetFadeAlpha(float alpha)
+    {
+        if (fadePanel == null) return;
+
+        Color color = fadePanel.color;
+        color.a = alpha;
+        fadePanel.color = color;
     }
 
     void Rotate(float angle)
