@@ -6,9 +6,18 @@ public class BreedingAnimController : MonoBehaviour
     public Animator breedingAnim;
     public FrogBreedingBox frogBreedingBox;
 
-    public float breedingDuration = 2f;
+    public GameObject heartEffect;
+
+    public AudioSource heartSound;
+
+    public float breedingDuration = 1.5f;
 
     private bool isCounting = false;
+
+    void Start()
+    {
+        heartEffect.SetActive(false);
+    }
 
     void Update()
     {
@@ -16,10 +25,26 @@ public class BreedingAnimController : MonoBehaviour
         {
             StartCoroutine(BreedingTimer());
         }
+
+        if (isCounting)
+        {
+            heartEffect.SetActive(true);
+        }
+        else
+        {
+            heartEffect.SetActive(false);
+        }
     }
 
-    IEnumerator BreedingTimer()
+    
+
+IEnumerator BreedingTimer()
     {
+        if (heartSound != null)
+        {
+            heartSound.Play();
+        }
+
         isCounting = true;
 
         breedingAnim.SetBool("isMating", true);
@@ -28,6 +53,7 @@ public class BreedingAnimController : MonoBehaviour
 
         breedingAnim.SetBool("isMating", false);
         frogBreedingBox.isBreeding = false;
+
 
         isCounting = false;
     }

@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections;
 
 public class FrogMovement : MonoBehaviour
@@ -11,6 +11,9 @@ public class FrogMovement : MonoBehaviour
     [Header("Jump Settings")]
     public float jumpForce = 6f;
     public float forwardForce = 4f;
+
+    [Header("Jump Sounds")]
+    public AudioSource jump;
 
     [Header("Turn Settings")]
     public float turnDuration = 0.2f;
@@ -222,7 +225,7 @@ public class FrogMovement : MonoBehaviour
 
         Quaternion startRot = rb.rotation;
 
-        // ÈÃ FrogRoot µÄ ZÖá¸º·½Ïò ³¯Ïò jumpDirection
+        // ÃˆÃƒ FrogRoot ÂµÃ„ ZÃ–Ã¡Â¸ÂºÂ·Â½ÃÃ² Â³Â¯ÃÃ² jumpDirection
         Quaternion targetRot = Quaternion.LookRotation(-jumpDirection, Vector3.up);
 
         float time = 0f;
@@ -281,6 +284,14 @@ public class FrogMovement : MonoBehaviour
             currentJumpDirection * forwardForce + Vector3.up * jumpForce,
             ForceMode.Impulse
         );
+
+        //  åœ¨è¿™é‡Œæ’­æ”¾
+        if (jump != null)
+        {
+            jump.pitch = Random.Range(0.9f, 1.1f);
+            jump.Play();
+        }
+            
 
         if (animator != null) animator.SetBool("isJumping", true);
         if (useScaleAnim) StartCoroutine(JumpStretch());

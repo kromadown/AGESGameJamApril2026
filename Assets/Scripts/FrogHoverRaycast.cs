@@ -10,6 +10,10 @@ public class FrogHoverRaycast : MonoBehaviour
 
     private FrogHoverUI currentUI;
 
+    public AudioSource popSound;
+    public AudioSource feedSound;
+    public AudioSource feedSpecialSound;
+
     void Update()
     {
         HandleHover();
@@ -102,6 +106,7 @@ public class FrogHoverRaycast : MonoBehaviour
         if (gift != null)
         {
             Debug.Log("Gift clicked");
+            popSound.Play();
             gift.Open();
             return;
         }
@@ -152,12 +157,14 @@ public class FrogHoverRaycast : MonoBehaviour
                     Debug.Log("👉 Using SPECIAL food");
 
                     feeding.FeedSpecial(manager.selectedFoodType);
+                    feedSpecialSound.Play();
                 }
                 else
                 {
                     Debug.Log("👉 Using NORMAL food");
 
                     feeding.Feed();
+                    feedSound.Play();
                 }
 
                 // consume food AFTER feeding

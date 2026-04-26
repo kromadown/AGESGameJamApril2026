@@ -14,7 +14,7 @@ public class FrogGiftBox : MonoBehaviour
     public void Open()
     {
         Debug.Log("OPEN CALLED! Frame: " + Time.frameCount);
-        Debug.Log("CALL STACK:\n" + System.Environment.StackTrace);
+        Debug.Log("CALL STACK:\n" + System.Environment.StackTrace);   
 
         if (opened) return;
         opened = true;

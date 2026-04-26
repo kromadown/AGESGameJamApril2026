@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -14,14 +14,15 @@ public class FoodButtonUI : MonoBehaviour
         if (system == null) return;
 
         int count = system.GetFoodCount(type);
+        int max = system.maxSpecialFood; // ✅ get limit
 
         // Enable / disable button
         button.interactable = count > 0;
 
-        // Update text
+        // Update text → "current / max"
         if (countText != null)
         {
-            countText.text = count.ToString();
+            countText.text = $"{count}/{max}";
         }
     }
 }

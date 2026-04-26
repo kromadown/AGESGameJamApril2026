@@ -15,14 +15,21 @@ public class UIManager : MonoBehaviour
     public Button resume;
     public Button mainMenu;
 
+    public Button tutorialReminder;
+
     public Button tutorialCheck;
     public Image tutorial;
     public Image mateTutorial;
     public Button mateTutotialCheck;
 
-    public Button food;
+    public Image tutorial1;
+    public Image tutorial2;
+    public Image tutorial3;
+    public Button understand;
 
     public Animator pauseMenu;
+
+    public AudioSource buttonSound;
 
     public float rotateDuration = 0.3f;
 
@@ -41,10 +48,14 @@ public class UIManager : MonoBehaviour
 
         resume.interactable = false;
         mainMenu.interactable = false;
+        tutorialReminder.interactable = false;
 
         mateTutorial.gameObject.SetActive(false);
 
-        food.gameObject.SetActive(false);
+        tutorial1.gameObject.SetActive(false);
+        tutorial2.gameObject.SetActive(false);
+        tutorial3.gameObject.SetActive(false);
+        understand.gameObject.SetActive(false);
     }
 
     void TutorialCheck()
@@ -52,6 +63,8 @@ public class UIManager : MonoBehaviour
         tutorial.gameObject.SetActive(false);
         mateTutorial.gameObject.SetActive(true);
         mateTutotialCheck.onClick.AddListener(MateTutorialCheck);
+        
+        buttonSound.Play();
     }
 
     void MateTutorialCheck()
@@ -62,8 +75,37 @@ public class UIManager : MonoBehaviour
         pause.onClick.AddListener(Pause);
         resume.onClick.AddListener(Resume);
         mainMenu.onClick.AddListener(MainMenu);
+        tutorialReminder.onClick.AddListener(TutorialReminder);
+        
+        buttonSound.Play();
 
-        food.gameObject.SetActive(true);
+    }
+
+    void TutorialReminder()
+    {
+        tutorial1.gameObject.SetActive(true);
+        tutorial2.gameObject.SetActive(true);
+        tutorial3.gameObject.SetActive(true);
+
+        mainMenu.interactable = false;
+        tutorialReminder.interactable = false;
+        resume.interactable = false;
+        understand.gameObject.SetActive(true);
+        understand.onClick.AddListener(Understand);
+    }
+
+    void Understand()
+    {
+        tutorial1.gameObject.SetActive(false);
+        tutorial2.gameObject.SetActive(false);
+        tutorial3.gameObject.SetActive(false);
+
+        mainMenu.interactable = true;
+        tutorialReminder.interactable = true;
+        resume.interactable = true;
+        understand.gameObject.SetActive(false);
+
+        buttonSound.Play();
     }
 
     void Pause()
@@ -73,6 +115,7 @@ public class UIManager : MonoBehaviour
 
         resume.interactable = true;
         mainMenu.interactable = true;
+        tutorialReminder.interactable = true;
 
         pauseMenu.SetBool("Paused", true);
 
@@ -86,6 +129,7 @@ public class UIManager : MonoBehaviour
 
         resume.interactable = false;
         mainMenu.interactable = false;
+        tutorialReminder.interactable = false;
 
         pauseMenu.SetBool("Paused", false);
         pauseMenu.SetTrigger("Resumed");

@@ -64,6 +64,14 @@ PrefabInstance:
       propertyPath: frogModel
       value: 
       objectReference: {fileID: 2533177438693022594}
+    - target: {fileID: 4903240121703612959, guid: a9c0c45cfdb401840951895a8df6a680, type: 3}
+      propertyPath: maxJumpInterval
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4903240121703612959, guid: a9c0c45cfdb401840951895a8df6a680, type: 3}
+      propertyPath: minJumpInterval
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 6559788289480524119, guid: a9c0c45cfdb401840951895a8df6a680, type: 3}
       propertyPath: m_Name
       value: FrogC
@@ -91,6 +99,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 6926570759376523057}
     m_Modifications:
     - target: {fileID: 65028792746102210, guid: ef0f6fc9c96bb3e4a9feeb642d00a6be, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 150
+      objectReference: {fileID: 0}
+    - target: {fileID: 65028792746102210, guid: ef0f6fc9c96bb3e4a9feeb642d00a6be, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.05
       objectReference: {fileID: 0}
@@ -104,7 +116,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 65028792746102210, guid: ef0f6fc9c96bb3e4a9feeb642d00a6be, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 2.53
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6304128481842410896, guid: ef0f6fc9c96bb3e4a9feeb642d00a6be, type: 3}
       propertyPath: m_Name
@@ -112,15 +124,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6644801595791109930, guid: ef0f6fc9c96bb3e4a9feeb642d00a6be, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.40000004
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 6644801595791109930, guid: ef0f6fc9c96bb3e4a9feeb642d00a6be, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.40000004
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 6644801595791109930, guid: ef0f6fc9c96bb3e4a9feeb642d00a6be, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.40000004
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 6644801595791109930, guid: ef0f6fc9c96bb3e4a9feeb642d00a6be, type: 3}
       propertyPath: m_LocalPosition.x

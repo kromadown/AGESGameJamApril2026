@@ -36,7 +36,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 2}
+  m_AnchoredPosition: {x: 0, y: 2.5}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &6843448053173260352
@@ -121,6 +121,7 @@ GameObject:
   - component: {fileID: 5881775706529570409}
   - component: {fileID: 4318664195827470660}
   - component: {fileID: 2527603954150268090}
+  - component: {fileID: 6331621256416781439}
   m_Layer: 7
   m_Name: FrogAC
   m_TagString: Untagged
@@ -259,9 +260,10 @@ MonoBehaviour:
   minAirTime: 0.2
   jumpForce: 6
   forwardForce: 4
+  jump: {fileID: 6331621256416781439}
   turnDuration: 0.2
-  minJumpInterval: 1
-  maxJumpInterval: 9
+  minJumpInterval: 4
+  maxJumpInterval: 6
   plane: {fileID: 0}
   groundCheck: {fileID: 7619507441418778212}
   groundDistance: 0.3
@@ -316,7 +318,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrogFeeding
   mateFeedThreshold: 3
-  maxFeed: 6
+  maxFeed: 4
   hasMated: 0
   giftBoxPrefab: {fileID: 6104924374118960051, guid: a289a7c3bf3ea13419b22a90b19d5d0a, type: 3}
   giftSpawnPointName: GiftSpawnPoint
@@ -374,6 +376,103 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!82 &6331621256416781439
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7635021331815841472}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 8300000, guid: 3c32421ca8b0af9409e8af361f971d8f, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &8206397754499964466
 GameObject:
   m_ObjectHideFlags: 0
@@ -408,8 +507,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 6.29}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: 0, y: 2}
+  m_SizeDelta: {x: 150, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4121967805380385787
 CanvasRenderer:
@@ -552,15 +651,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 8242275113080674217, guid: 8989167b70ea6174a9a5656f2b761d5e, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.40000004
+      value: 0.67
       objectReference: {fileID: 0}
     - target: {fileID: 8242275113080674217, guid: 8989167b70ea6174a9a5656f2b761d5e, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.40000004
+      value: 0.67
       objectReference: {fileID: 0}
     - target: {fileID: 8242275113080674217, guid: 8989167b70ea6174a9a5656f2b761d5e, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.40000004
+      value: 0.67
       objectReference: {fileID: 0}
     - target: {fileID: 8242275113080674217, guid: 8989167b70ea6174a9a5656f2b761d5e, type: 3}
       propertyPath: m_LocalPosition.x
