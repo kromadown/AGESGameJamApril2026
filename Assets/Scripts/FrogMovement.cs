@@ -56,6 +56,17 @@ public class FrogMovement : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
 
+        // Auto-find plane (for prefabs)
+        if (plane == null)
+        {
+            GameObject found = GameObject.FindGameObjectWithTag("Ground");
+
+            if (found != null)
+                plane = found.transform;
+            else
+                Debug.LogError("No GameObject with tag 'Ground' found for FrogMovement!");
+        }
+
         animator.SetBool("isJumping", false);
 
         if (frogModel == null)
@@ -63,7 +74,8 @@ public class FrogMovement : MonoBehaviour
 
         originalScale = frogModel.localScale;
 
-        CalculateBounds();
+        if (plane != null)
+            CalculateBounds();
 
         gameObject.layer = LayerMask.NameToLayer("Frog");
         Physics.IgnoreLayerCollision(

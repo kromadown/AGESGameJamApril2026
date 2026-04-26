@@ -40,11 +40,9 @@ public class FrogHoverRaycast : MonoBehaviour
         {
             if (!isHoldingFood)
             {
-                // 🟢 BREEDING MODE → only show if ready
                 if (feeding != null && !feeding.IsReadyToMate())
                     newHover = null;
             }
-            // 🟡 FOOD MODE → always allow hover outline
         }
 
         // =========================
@@ -62,7 +60,7 @@ public class FrogHoverRaycast : MonoBehaviour
         }
 
         // =========================
-        // UI LOGIC (unchanged)
+        // UI LOGIC
         // =========================
         if (newUI != currentUI)
         {
@@ -94,29 +92,45 @@ public class FrogHoverRaycast : MonoBehaviour
 
     void HandleClick()
     {
-        if (!Mouse.current.leftButton.wasPressedThisFrame)
-            return;
-
+        // ❗ MUST raycast first
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
 
         if (!Physics.Raycast(ray, out RaycastHit hit))
             return;
 
-        Outline clicked = hit.transform.GetComponentInParent<Outline>();
-        FrogFeeding feeding = hit.transform.GetComponentInParent<FrogFeeding>();
-        FrogBreedingBox box = hit.transform.GetComponent<FrogBreedingBox>();
+        // =========================
+        // 🎁 GIFT BOX CLICK (FIRST PRIORITY)
+        // =========================
+        FrogGiftBox gift = hit.transform.GetComponentInParent<FrogGiftBox>();
+
+        if (gift != null)
+        {
+            Debug.Log("GiftBox clicked");
+            gift.Open();
+            return;
+        }
 
         // =========================
-        // 📦 BREEDING BOX FIRST
+        // BASIC COMPONENTS
+        // =========================
+        if (!Mouse.current.leftButton.wasPressedThisFrame)
+            return;
+
+        Outline clicked = hit.transform.GetComponentInParent<Outline>();
+        FrogFeeding feeding = hit.transform.GetComponentInParent<FrogFeeding>();
+        FrogBreedingBox box = hit.transform.GetComponentInParent<FrogBreedingBox>();
+        FrogIdentity frog = hit.transform.GetComponentInParent<FrogIdentity>();
+
+        // =========================
+        // 📦 BREEDING BOX
         // =========================
         if (box != null && selected != null)
         {
-            // 🚫 block if frog is not ready
             FrogFeeding selectedFeeding = selected.GetComponent<FrogFeeding>();
 
             if (selectedFeeding != null && !selectedFeeding.IsReadyToMate())
             {
-                Debug.Log("Frog is not ready to mate yet!");
+                Debug.Log("Frog not ready");
                 return;
             }
 
@@ -130,14 +144,25 @@ public class FrogHoverRaycast : MonoBehaviour
         // =========================
         // 🍖 FEEDING MODE
         // =========================
-        if (FoodManager.Instance.isHoldingFood)
+        if (FoodManager.Instance != null && FoodManager.Instance.isHoldingFood)
         {
             if (feeding != null)
             {
                 feeding.Feed();
+
+                if (feeding.GetFeedCount() >= 6)
+                {
+                    FrogGiftSystem system = FindFirstObjectByType<FrogGiftSystem>();
+
+                    if (system != null && frog != null)
+                        system.GiveGift(frog.GetComponent<FrogIdentity>(), frog.transform.position);
+
+                    feeding.ResetFeed();
+                }
+
                 FoodManager.Instance.ClearFood();
+                return;
             }
-            return;
         }
 
         // =========================
@@ -147,14 +172,12 @@ public class FrogHoverRaycast : MonoBehaviour
         {
             FrogFeeding clickedFeeding = clicked.GetComponent<FrogFeeding>();
 
-            // 🚫 BLOCK SELECTION IF NOT FULLY FED
             if (clickedFeeding != null && !clickedFeeding.IsReadyToMate())
             {
-                Debug.Log("This frog needs more feeding before it can be selected!");
+                Debug.Log("Not ready yet");
                 return;
             }
 
-            // toggle deselect
             if (selected == clicked)
             {
                 selected.enabled = false;
@@ -171,7 +194,9 @@ public class FrogHoverRaycast : MonoBehaviour
             return;
         }
 
-        // empty click
+        // =========================
+        // EMPTY CLICK
+        // =========================
         if (selected != null)
         {
             selected.enabled = false;
@@ -179,12 +204,11 @@ public class FrogHoverRaycast : MonoBehaviour
         }
     }
 
-    // 🔥 RESTORED (needed by FoodManager)
     public void RefreshHoverUI()
     {
         if (currentUI == null) return;
 
-        if (FoodManager.Instance.isHoldingFood)
+        if (FoodManager.Instance != null && FoodManager.Instance.isHoldingFood)
             currentUI.ShowUI();
         else
             currentUI.HideUI();
