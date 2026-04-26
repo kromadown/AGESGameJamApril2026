@@ -8,9 +8,13 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 705074323400485220, guid: a9c0c45cfdb401840951895a8df6a680, type: 3}
+      propertyPath: maxFeed
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 2082628978462551639, guid: a9c0c45cfdb401840951895a8df6a680, type: 3}
       propertyPath: frogType
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 2656270001575328535, guid: a9c0c45cfdb401840951895a8df6a680, type: 3}
       propertyPath: canvas

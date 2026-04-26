@@ -17,7 +17,7 @@ public class FrogGiftSystem : MonoBehaviour
     [Range(0, 1)] public float permutationChance = 0.1f;
 
     [Header("Special Food Limits")]
-    public int maxSpecialFood = 3;
+    public int maxSpecialFood = 4;
 
     private int foodA = 0;
     private int foodB = 0;

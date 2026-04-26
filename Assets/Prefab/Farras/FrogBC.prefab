@@ -217,7 +217,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c4d2df4af14d5245bebb849b2104441, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrogIdentity
-  frogType: 5
+  frogType: 6
   feedCount: 0
   requiredFeeds: 3
 --- !u!114 &2172102559709801505
@@ -245,7 +245,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrogFeeding
   mateFeedThreshold: 3
-  maxFeed: 6
+  maxFeed: 4
   hasMated: 0
   giftBoxPrefab: {fileID: 6104924374118960051, guid: a289a7c3bf3ea13419b22a90b19d5d0a, type: 3}
   giftSpawnPointName: GiftSpawnPoint
