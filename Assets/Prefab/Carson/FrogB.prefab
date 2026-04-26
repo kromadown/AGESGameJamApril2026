@@ -219,7 +219,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c4d2df4af14d5245bebb849b2104441, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrogIdentity
-  frogType: 1
+  frogType: 2
   feedCount: 0
   requiredFeeds: 3
 --- !u!114 &1645790503006190529

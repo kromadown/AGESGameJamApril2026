@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2082628978462551639, guid: a9c0c45cfdb401840951895a8df6a680, type: 3}
       propertyPath: frogType
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 2656270001575328535, guid: a9c0c45cfdb401840951895a8df6a680, type: 3}
       propertyPath: canvas
