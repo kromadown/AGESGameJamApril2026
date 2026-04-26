@@ -15,6 +15,13 @@ public class UIManager : MonoBehaviour
     public Button resume;
     public Button mainMenu;
 
+    public Button tutorialCheck;
+    public Image tutorial;
+    public Image mateTutorial;
+    public Button mateTutotialCheck;
+
+    public Button food;
+
     public Animator pauseMenu;
 
     public float rotateDuration = 0.3f;
@@ -30,21 +37,39 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
+        tutorialCheck.onClick.AddListener(TutorialCheck);
+
+        resume.interactable = false;
+        mainMenu.interactable = false;
+
+        mateTutorial.gameObject.SetActive(false);
+
+        food.gameObject.SetActive(false);
+    }
+
+    void TutorialCheck()
+    {
+        tutorial.gameObject.SetActive(false);
+        mateTutorial.gameObject.SetActive(true);
+        mateTutotialCheck.onClick.AddListener(MateTutorialCheck);
+    }
+
+    void MateTutorialCheck()
+    {
+        mateTutorial.gameObject.SetActive(false);
         turnRight.onClick.AddListener(() => Rotate(-90));
         turnLeft.onClick.AddListener(() => Rotate(90));
         pause.onClick.AddListener(Pause);
         resume.onClick.AddListener(Resume);
         mainMenu.onClick.AddListener(MainMenu);
 
-        resume.interactable = false;
-        mainMenu.interactable = false;
+        food.gameObject.SetActive(true);
     }
 
     void Pause()
     {
         turnRight.interactable = false;
         turnLeft.interactable = false;
-        pause.interactable = false;
 
         resume.interactable = true;
         mainMenu.interactable = true;
@@ -58,7 +83,6 @@ public class UIManager : MonoBehaviour
     {
         turnRight.interactable = true;
         turnLeft.interactable = true;
-        pause.interactable = true;
 
         resume.interactable = false;
         mainMenu.interactable = false;

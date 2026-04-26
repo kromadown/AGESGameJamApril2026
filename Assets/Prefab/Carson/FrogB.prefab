@@ -313,15 +313,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 13155484299237356, guid: 0d1823de18d14d4449ab890121dc31f4, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.34
+      value: 0.40000004
       objectReference: {fileID: 0}
     - target: {fileID: 13155484299237356, guid: 0d1823de18d14d4449ab890121dc31f4, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.34
+      value: 0.40000004
       objectReference: {fileID: 0}
     - target: {fileID: 13155484299237356, guid: 0d1823de18d14d4449ab890121dc31f4, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.34
+      value: 0.40000004
       objectReference: {fileID: 0}
     - target: {fileID: 13155484299237356, guid: 0d1823de18d14d4449ab890121dc31f4, type: 3}
       propertyPath: m_LocalPosition.x
@@ -370,6 +370,22 @@ PrefabInstance:
     - target: {fileID: 821181784651812182, guid: 0d1823de18d14d4449ab890121dc31f4, type: 3}
       propertyPath: m_Name
       value: Frog_B
+      objectReference: {fileID: 0}
+    - target: {fileID: 7539039534742872555, guid: 0d1823de18d14d4449ab890121dc31f4, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 7539039534742872555, guid: 0d1823de18d14d4449ab890121dc31f4, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 7539039534742872555, guid: 0d1823de18d14d4449ab890121dc31f4, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 7539039534742872555, guid: 0d1823de18d14d4449ab890121dc31f4, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 2.79
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
