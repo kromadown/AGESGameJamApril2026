@@ -135,32 +135,23 @@ public class FrogHoverRaycast : MonoBehaviour
         }
 
         // =========================
-        // 🍖 FEEDING MODE (UPDATED)
+        // 🍖 FEEDING MODE (SIMPLIFIED)
         // =========================
         if (FoodManager.Instance != null && FoodManager.Instance.isHoldingFood)
         {
-            if (feeding != null && frog != null)
+            if (feeding != null)
             {
                 var manager = FoodManager.Instance;
 
-                Debug.Log($"[CLICK] Feeding frog: {frog.frogType}");
-                Debug.Log($"[MODE] {manager.currentMode}");
-                Debug.Log($"[SELECTED FOOD] {manager.selectedFoodType}");
+                FrogType foodType = manager.selectedFoodType;
 
-                if (manager.currentMode == FoodManager.FoodMode.Special)
-                {
-                    Debug.Log("👉 Using SPECIAL food");
+                Debug.Log($"[FEED CLICK] Frog: {frog?.frogType}");
+                Debug.Log($"[FOOD USED] {foodType}");
 
-                    feeding.FeedSpecial(manager.selectedFoodType);
-                }
-                else
-                {
-                    Debug.Log("👉 Using NORMAL food");
+                // ✅ ALWAYS use unified feed
+                feeding.Feed(foodType);
 
-                    feeding.Feed();
-                }
-
-                // consume food AFTER feeding
+                // consume AFTER feeding
                 manager.ConsumeSelectedFood();
 
                 return;
