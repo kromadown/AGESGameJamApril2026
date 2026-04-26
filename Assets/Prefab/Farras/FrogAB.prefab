@@ -920,6 +920,7 @@ GameObject:
   - component: {fileID: 386494689587225919}
   - component: {fileID: 2902852525697759052}
   - component: {fileID: 7896259479181577085}
+  - component: {fileID: 2667994782925423745}
   - component: {fileID: 7151528593115432100}
   m_Layer: 7
   m_Name: FrogAB
@@ -1152,6 +1153,24 @@ MonoBehaviour:
   precomputeOutline: 0
   bakeKeys: []
   bakeValues: []
+--- !u!114 &2667994782925423745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6313196971958078732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 126a4222f52029c47a6000ed53666f22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FrogSpecialFoodTracker
+  rules:
+  - frogType: 4
+    foodType: 1
+    requiredAmount: 4
+    targetObject: {fileID: 919132149155446097, guid: 1dc23b0c5a16c004fb2ae87dd1b3008c, type: 3}
+    triggered: 0
 --- !u!95 &7151528593115432100
 Animator:
   serializedVersion: 7
