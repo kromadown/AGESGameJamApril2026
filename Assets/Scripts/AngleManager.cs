@@ -50,6 +50,8 @@ public class UIManager : MonoBehaviour
         mainMenu.interactable = true;
 
         pauseMenu.SetBool("Paused", true);
+
+        Time.timeScale = 0f;
     }
 
     void Resume()
@@ -63,6 +65,8 @@ public class UIManager : MonoBehaviour
 
         pauseMenu.SetBool("Paused", false);
         pauseMenu.SetTrigger("Resumed");
+
+        Time.timeScale = 1f;
     }
 
     void MainMenu()
@@ -80,6 +84,8 @@ public class UIManager : MonoBehaviour
     {
         yield return StartCoroutine(FadeOut());
 
+        Time.timeScale = 1f;
+
         SceneManager.LoadScene(sceneName);
     }
 
@@ -89,13 +95,14 @@ public class UIManager : MonoBehaviour
 
         while (time < fadeDuration)
         {
-            time += Time.deltaTime;
+            time += Time.unscaledDeltaTime;
             float t = time / fadeDuration;
 
             SetFadeAlpha(t);
 
             yield return null;
         }
+
         SetFadeAlpha(1f);
     }
 
