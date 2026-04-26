@@ -33,9 +33,7 @@ public class FrogHoverRaycast : MonoBehaviour
 
         bool isHoldingFood = FoodManager.Instance != null && FoodManager.Instance.isHoldingFood;
 
-        // =========================
         // 🎯 OUTLINE RULES
-        // =========================
         if (newHover != null)
         {
             if (!isHoldingFood)
@@ -45,9 +43,7 @@ public class FrogHoverRaycast : MonoBehaviour
             }
         }
 
-        // =========================
         // APPLY OUTLINE
-        // =========================
         if (newHover != currentHover)
         {
             if (currentHover != null && currentHover != selected)
@@ -59,9 +55,7 @@ public class FrogHoverRaycast : MonoBehaviour
                 currentHover.enabled = true;
         }
 
-        // =========================
         // UI LOGIC
-        // =========================
         if (newUI != currentUI)
         {
             if (currentUI != null)
@@ -95,45 +89,27 @@ public class FrogHoverRaycast : MonoBehaviour
         if (!Mouse.current.leftButton.wasPressedThisFrame)
             return;
 
-        // ❗ MUST raycast first
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
 
         if (!Physics.Raycast(ray, out RaycastHit hit))
             return;
 
         // =========================
-        // 🎁 GIFT BOX CLICK (FIRST PRIORITY)
+        // 🎁 GIFT BOX (TOP PRIORITY)
         // =========================
-        if (hit.transform.CompareTag("Gift"))
+        FrogGiftBox gift = hit.transform.GetComponentInParent<FrogGiftBox>();
+
+        if (gift != null)
         {
-            FrogGiftBox gift = hit.transform.GetComponentInParent<FrogGiftBox>();
-
-            if (gift != null)
-            {
-                Debug.Log("Gift clicked (TAG SYSTEM)");
-                gift.Open();
-            }
-
+            Debug.Log("Gift clicked");
+            gift.Open();
             return;
         }
 
         // =========================
-        // BASIC COMPONENTS
+        // COMPONENTS
         // =========================
-
-        Outline clicked = null;
-
-        if (hit.transform.CompareTag("Gift"))
-        {
-            FrogGiftBox gift = hit.transform.GetComponentInParent<FrogGiftBox>();
-
-            if (gift != null)
-            {
-                gift.Open();
-            }
-
-            return;
-        }
+        Outline clicked = hit.transform.GetComponentInParent<Outline>();
         FrogFeeding feeding = hit.transform.GetComponentInParent<FrogFeeding>();
         FrogBreedingBox box = hit.transform.GetComponentInParent<FrogBreedingBox>();
         FrogIdentity frog = hit.transform.GetComponentInParent<FrogIdentity>();
@@ -159,25 +135,34 @@ public class FrogHoverRaycast : MonoBehaviour
         }
 
         // =========================
-        // 🍖 FEEDING MODE
+        // 🍖 FEEDING MODE (UPDATED)
         // =========================
         if (FoodManager.Instance != null && FoodManager.Instance.isHoldingFood)
         {
             if (feeding != null)
             {
+                // 🐸 feed frog
                 feeding.Feed();
 
+                // 🍖 consume actual food (THIS IS THE FIX)
+                FoodManager.Instance.ConsumeSelectedFood();
+
+                // 🎁 gift check
                 if (feeding.GetFeedCount() >= 6)
                 {
                     FrogGiftSystem system = FindFirstObjectByType<FrogGiftSystem>();
 
                     if (system != null && frog != null)
-                        system.GiveGift(frog.GetComponent<FrogIdentity>(), frog.transform.position);
+                    {
+                        system.GiveGift(
+                            frog.GetComponent<FrogIdentity>(),
+                            frog.transform.position
+                        );
+                    }
 
                     feeding.ResetFeed();
                 }
 
-                FoodManager.Instance.ClearFood();
                 return;
             }
         }
@@ -195,6 +180,7 @@ public class FrogHoverRaycast : MonoBehaviour
                 return;
             }
 
+            // toggle select
             if (selected == clicked)
             {
                 selected.enabled = false;

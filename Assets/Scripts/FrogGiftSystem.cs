@@ -23,29 +23,25 @@ public class FrogGiftSystem : MonoBehaviour
     private int foodB = 0;
     private int foodC = 0;
 
+    // =========================
+    // 🎁 MAIN GIFT LOGIC
+    // =========================
     public void GiveGift(FrogIdentity giver, Vector3 spawnPos)
     {
         Debug.Log($"[GiftSystem] Giver = {giver?.frogType}");
 
         bool foodFull = IsFoodFull();
-
         float roll = Random.value;
 
-        // =========================
-        // 🎯 DYNAMIC TOTAL
-        // =========================
-        float totalWeight = 0f;
-
-        if (!foodFull)
-            totalWeight += specialFoodChance;
-
-        totalWeight += normalFrogChance;
-        totalWeight += permutationChance;
+        float totalWeight =
+            (!foodFull ? specialFoodChance : 0f) +
+            normalFrogChance +
+            permutationChance;
 
         float cumulative = 0f;
 
         // =========================
-        // 🎁 SPECIAL FOOD (only if NOT full)
+        // 🎁 SPECIAL FOOD
         // =========================
         if (!foodFull)
         {
@@ -76,17 +72,58 @@ public class FrogGiftSystem : MonoBehaviour
 
         if (result != null)
         {
-            Debug.Log("[GiftSystem] PERMUTATION frog spawned");
             Instantiate(result, spawnPos, Quaternion.identity);
-        }
-        else
-        {
-            Debug.LogError("[GiftSystem] Permutation result NULL");
+            Debug.Log("[GiftSystem] PERMUTATION frog spawned");
         }
     }
 
     // =========================
-    // 🎁 FOOD FULL CHECK
+    // 🎯 UI + FOOD SYSTEM ACCESS
+    // =========================
+    public int GetFoodCount(FrogType type)
+    {
+        return type switch
+        {
+            FrogType.A => foodA,
+            FrogType.B => foodB,
+            FrogType.C => foodC,
+            _ => 0
+        };
+    }
+
+    public bool UseFood(FrogType type)
+    {
+        switch (type)
+        {
+            case FrogType.A:
+                if (foodA <= 0) return false;
+                foodA--;
+                Debug.Log($"[Food] Used A → {foodA} left");
+                return true;
+
+            case FrogType.B:
+                if (foodB <= 0) return false;
+                foodB--;
+                Debug.Log($"[Food] Used B → {foodB} left");
+                return true;
+
+            case FrogType.C:
+                if (foodC <= 0) return false;
+                foodC--;
+                Debug.Log($"[Food] Used C → {foodC} left");
+                return true;
+        }
+
+        return false;
+    }
+
+    public bool HasFood(FrogType type)
+    {
+        return GetFoodCount(type) > 0;
+    }
+
+    // =========================
+    // 🎁 CHECK FULL INVENTORY
     // =========================
     bool IsFoodFull()
     {
@@ -96,47 +133,34 @@ public class FrogGiftSystem : MonoBehaviour
     }
 
     // =========================
-    // 🎁 SPECIAL FOOD LOGIC
+    // 🎁 SPECIAL FOOD ROLL
     // =========================
     bool TryGiveSpecialFood()
     {
-        int attempts = 0;
-
-        while (attempts < 10)
+        for (int i = 0; i < 10; i++)
         {
             int r = Random.Range(0, 3);
 
-            switch (r)
+            if (r == 0 && foodA < maxSpecialFood)
             {
-                case 0:
-                    if (foodA < maxSpecialFood)
-                    {
-                        foodA++;
-                        Debug.Log($"[GiftSystem] GOT Special Food A ({foodA}/{maxSpecialFood})");
-                        return true;
-                    }
-                    break;
-
-                case 1:
-                    if (foodB < maxSpecialFood)
-                    {
-                        foodB++;
-                        Debug.Log($"[GiftSystem] GOT Special Food B ({foodB}/{maxSpecialFood})");
-                        return true;
-                    }
-                    break;
-
-                case 2:
-                    if (foodC < maxSpecialFood)
-                    {
-                        foodC++;
-                        Debug.Log($"[GiftSystem] GOT Special Food C ({foodC}/{maxSpecialFood})");
-                        return true;
-                    }
-                    break;
+                foodA++;
+                Debug.Log($"[GiftSystem] Special Food A ({foodA}/{maxSpecialFood})");
+                return true;
             }
 
-            attempts++;
+            if (r == 1 && foodB < maxSpecialFood)
+            {
+                foodB++;
+                Debug.Log($"[GiftSystem] Special Food B ({foodB}/{maxSpecialFood})");
+                return true;
+            }
+
+            if (r == 2 && foodC < maxSpecialFood)
+            {
+                foodC++;
+                Debug.Log($"[GiftSystem] Special Food C ({foodC}/{maxSpecialFood})");
+                return true;
+            }
         }
 
         return false;
@@ -147,18 +171,15 @@ public class FrogGiftSystem : MonoBehaviour
     // =========================
     void SpawnRandomBaseFrog(Vector3 pos)
     {
-        int r = Random.Range(0, 3);
-
-        GameObject result = r switch
+        GameObject result = Random.Range(0, 3) switch
         {
             0 => frogAPrefab,
             1 => frogBPrefab,
             _ => frogCPrefab
         };
 
-        Debug.Log($"[GiftSystem] BASE frog spawned: {result.name}");
-
         Instantiate(result, pos, Quaternion.identity);
+        Debug.Log($"[GiftSystem] BASE frog spawned: {result.name}");
     }
 
     // =========================
