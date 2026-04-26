@@ -22,6 +22,48 @@ public class FrogBreedingBox : MonoBehaviour
     private FrogType typeA;
     private FrogType typeB;
 
+    // =========================
+    // 🔍 CORE SAFETY CHECK
+    // =========================
+    bool CanPlaceFrogSafely()
+    {
+        FrogIdentity[] frogs = FindObjectsByType<FrogIdentity>(FindObjectsSortMode.None);
+
+        int activeFrogs = 0;
+
+        foreach (var f in frogs)
+        {
+            if (f.gameObject.activeInHierarchy)
+                activeFrogs++;
+        }
+
+        int boxCount = 0;
+        if (slotA != null) boxCount++;
+        if (slotB != null) boxCount++;
+
+        // =========================
+        // 🟢 ALWAYS ALLOW IF BOX HAS EMPTY SLOT
+        // BUT ONLY IF RESULT WON'T BREAK GAME STATE
+        // =========================
+
+        // If box has 1 frog already, placing second is ALWAYS safe
+        if (boxCount == 1)
+            return true;
+
+        // If box is empty, we must ensure player won't lose ability to continue gameplay
+        if (boxCount == 0)
+        {
+            // If this is the last frog AND no frog is in box yet → block
+            if (activeFrogs <= 1)
+                return false;
+        }
+
+        return true;
+    }
+
+    // =========================
+    // 📦 PLACE FROG
+    // =========================
     public void PlaceSelectedFrog(GameObject frog)
     {
         if (frog == null) return;
@@ -30,6 +72,13 @@ public class FrogBreedingBox : MonoBehaviour
         if (id == null)
         {
             Debug.LogError("Frog is missing FrogIdentity!");
+            return;
+        }
+
+        // 🚫 SAFETY CHECK (NOW ACTUALLY USED)
+        if (!CanPlaceFrogSafely())
+        {
+            Debug.Log("Cannot place frog: would soft-lock breeding.");
             return;
         }
 
@@ -50,6 +99,9 @@ public class FrogBreedingBox : MonoBehaviour
         frog.SetActive(false);
     }
 
+    // =========================
+    // 🧬 BREEDING
+    // =========================
     void TryBreed()
     {
         if (slotA == null || slotB == null)
@@ -109,7 +161,7 @@ public class FrogBreedingBox : MonoBehaviour
         if (hoverUI != null)
             hoverUI.HideUI();
 
-        Vector3 spawnPos = FindSafePosition(index, frog);
+        Vector3 spawnPos = FindSafePosition(index);
         frog.transform.position = spawnPos;
 
         Rigidbody rb = frog.GetComponent<Rigidbody>();
@@ -121,15 +173,13 @@ public class FrogBreedingBox : MonoBehaviour
         }
     }
 
-    Vector3 FindSafePosition(int index, GameObject frog)
+    Vector3 FindSafePosition(int index)
     {
         int attempts = 20;
 
         for (int i = 0; i < attempts; i++)
         {
-            // 🔥 each frog gets its OWN sector (prevents clustering)
             float baseAngle = index == 0 ? 0f : 180f;
-
             float angle = baseAngle + Random.Range(-60f, 60f);
 
             Vector3 direction = new Vector3(
@@ -138,7 +188,6 @@ public class FrogBreedingBox : MonoBehaviour
                 Mathf.Sin(angle * Mathf.Deg2Rad)
             );
 
-            // 🔥 enforce MIN distance from box
             float minDistanceFromBox = boxClearanceRadius + 2.5f;
             float maxDistanceFromBox = returnRadius + 6f;
 
@@ -146,27 +195,21 @@ public class FrogBreedingBox : MonoBehaviour
 
             Vector3 candidate = transform.position + direction * distance;
 
-            // ❌ avoid obstacles
             if (Physics.CheckSphere(candidate, 0.6f, obstacleMask))
                 continue;
 
-            // ❌ avoid spawning too close to box center
             if (Vector3.Distance(candidate, transform.position) < minDistanceFromBox)
                 continue;
 
-            // ground snap
             if (Physics.Raycast(candidate + Vector3.up * 5f, Vector3.down, out RaycastHit hit))
             {
                 candidate = hit.point;
             }
 
-            // slight lift to prevent physics jitter
             candidate.y += 0.1f;
-
             return candidate;
         }
 
-        // 🔥 fallback guaranteed safe opposite sides
         Vector3 fallbackDir = (index == 0 ? Vector3.right : Vector3.left);
         return transform.position + fallbackDir * (returnRadius + 5f);
     }

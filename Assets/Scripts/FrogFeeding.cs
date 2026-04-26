@@ -4,7 +4,7 @@ using System;
 public class FrogFeeding : MonoBehaviour
 {
     public int mateFeedThreshold = 3;
-    public int maxFeed = 6;
+    public int maxFeed = 4;
 
     private int currentFeed = 0;
 
@@ -19,18 +19,22 @@ public class FrogFeeding : MonoBehaviour
 
     private Transform giftSpawnPoint;
 
+    // =========================
+    // 🍎 SPECIAL FOOD TRACKING (SINGLE TYPE ONLY)
+    // =========================
+    private FrogType lastSpecialFood = FrogType.None;
+    private int specialStreak = 0;
+
+    private const int specialLimit = 4;
+
     void Start()
     {
         GameObject found = GameObject.Find(giftSpawnPointName);
 
         if (found != null)
-        {
             giftSpawnPoint = found.transform;
-        }
         else
-        {
             Debug.LogWarning($"GiftSpawnPoint '{giftSpawnPointName}' not found in scene!");
-        }
     }
 
     public bool IsReadyToMate()
@@ -43,6 +47,9 @@ public class FrogFeeding : MonoBehaviour
         return currentFeed < maxFeed && !hasMated;
     }
 
+    // =========================
+    // 🍽 NORMAL FEEDING
+    // =========================
     public void Feed()
     {
         if (!CanBeFed()) return;
@@ -56,6 +63,61 @@ public class FrogFeeding : MonoBehaviour
         }
     }
 
+    // =========================
+    // 🍎 SPECIAL FOOD FEEDING (IMPORTANT RULE)
+    // =========================
+    public void FeedSpecial(FrogType type)
+    {
+        if (type == FrogType.None)
+            return;
+
+        FrogType frogType = GetComponent<FrogIdentity>().frogType;
+
+        // =========================
+        // 🎯 VALID COMBINATION RULES
+        // =========================
+        bool isValid =
+            (frogType == FrogType.AB && (type == FrogType.A || type == FrogType.B)) ||
+            (frogType == FrogType.AC && (type == FrogType.A || type == FrogType.C)) ||
+            (frogType == FrogType.BC && (type == FrogType.B || type == FrogType.C));
+
+        if (!isValid)
+        {
+            Debug.Log($"[Special Feed] {frogType} cannot accept {type}");
+            return;
+        }
+
+        // =========================
+        // 🔄 STREAK LOGIC
+        // =========================
+        if (type != lastSpecialFood)
+        {
+            lastSpecialFood = type;
+            specialStreak = 0;
+        }
+
+        specialStreak++;
+
+        Debug.Log($"[Special Feed] {frogType} got {type} = {specialStreak}/{specialLimit}");
+
+        if (specialStreak >= specialLimit)
+        {
+            TriggerSpecialEffect(type);
+            specialStreak = 0;
+        }
+    }
+
+    // =========================
+    // 🎯 SPECIAL EVENT
+    // =========================
+    void TriggerSpecialEffect(FrogType type)
+    {
+        Debug.Log($"🔥 SPECIAL FOOD {type} REACHED 6 CONSECUTIVE FEEDS → SPECIAL EVENT TRIGGERED");
+    }
+
+    // =========================
+    // 🎁 NORMAL GIFT BOX
+    // =========================
     void SpawnGiftBox()
     {
         if (giftSpawnPoint == null)
@@ -72,9 +134,7 @@ public class FrogFeeding : MonoBehaviour
 
         FrogGiftBox gift = box.GetComponent<FrogGiftBox>();
         if (gift != null)
-        {
             gift.Init(GetComponent<FrogIdentity>());
-        }
 
         ResetFeed();
     }

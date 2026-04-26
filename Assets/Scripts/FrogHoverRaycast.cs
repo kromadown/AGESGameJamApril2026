@@ -139,29 +139,29 @@ public class FrogHoverRaycast : MonoBehaviour
         // =========================
         if (FoodManager.Instance != null && FoodManager.Instance.isHoldingFood)
         {
-            if (feeding != null)
+            if (feeding != null && frog != null)
             {
-                // 🐸 feed frog
-                feeding.Feed();
+                var manager = FoodManager.Instance;
 
-                // 🍖 consume actual food (THIS IS THE FIX)
-                FoodManager.Instance.ConsumeSelectedFood();
+                Debug.Log($"[CLICK] Feeding frog: {frog.frogType}");
+                Debug.Log($"[MODE] {manager.currentMode}");
+                Debug.Log($"[SELECTED FOOD] {manager.selectedFoodType}");
 
-                // 🎁 gift check
-                if (feeding.GetFeedCount() >= 6)
+                if (manager.currentMode == FoodManager.FoodMode.Special)
                 {
-                    FrogGiftSystem system = FindFirstObjectByType<FrogGiftSystem>();
+                    Debug.Log("👉 Using SPECIAL food");
 
-                    if (system != null && frog != null)
-                    {
-                        system.GiveGift(
-                            frog.GetComponent<FrogIdentity>(),
-                            frog.transform.position
-                        );
-                    }
-
-                    feeding.ResetFeed();
+                    feeding.FeedSpecial(manager.selectedFoodType);
                 }
+                else
+                {
+                    Debug.Log("👉 Using NORMAL food");
+
+                    feeding.Feed();
+                }
+
+                // consume food AFTER feeding
+                manager.ConsumeSelectedFood();
 
                 return;
             }

@@ -1,5 +1,6 @@
 public enum FrogType
 {
+    None,
     A,
     B,
     C,

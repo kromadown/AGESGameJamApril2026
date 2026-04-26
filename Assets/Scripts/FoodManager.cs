@@ -7,6 +7,15 @@ public class FoodManager : MonoBehaviour
     public bool isHoldingFood = false;
     public FrogType selectedFoodType;
 
+    // ✅ ADD THIS (was missing)
+    public enum FoodMode
+    {
+        Normal,
+        Special
+    }
+
+    public FoodMode currentMode;
+
     [Header("Cursor Settings")]
     public Texture2D normalCursor;
     public Texture2D foodCursor;
@@ -24,7 +33,7 @@ public class FoodManager : MonoBehaviour
     }
 
     // =========================
-    // 🌟 SPECIAL FOOD SELECTION (CORE)
+    // 🌟 SPECIAL FOOD SELECTION
     // =========================
     public void SelectFood(FrogType type)
     {
@@ -37,6 +46,7 @@ public class FoodManager : MonoBehaviour
         }
 
         selectedFoodType = type;
+        currentMode = FoodMode.Special;
         isHoldingFood = true;
 
         SetFoodCursor();
@@ -46,30 +56,21 @@ public class FoodManager : MonoBehaviour
     }
 
     // =========================
-    // 🍖 UI WRAPPERS (UNITY BUTTON FIX)
+    // 🍖 UI WRAPPERS
     // =========================
-    public void SelectFoodA()
-    {
-        SelectFood(FrogType.A);
-    }
-
-    public void SelectFoodB()
-    {
-        SelectFood(FrogType.B);
-    }
-
-    public void SelectFoodC()
-    {
-        SelectFood(FrogType.C);
-    }
+    public void SelectFoodA() => SelectFood(FrogType.A);
+    public void SelectFoodB() => SelectFood(FrogType.B);
+    public void SelectFoodC() => SelectFood(FrogType.C);
 
     // =========================
     // 🍖 NORMAL FOOD
     // =========================
     public void SelectNormalFood()
     {
-        selectedFoodType = FrogType.A; // placeholder (ignored in special logic)
+        currentMode = FoodMode.Normal;
         isHoldingFood = true;
+
+        selectedFoodType = FrogType.None; // IMPORTANT FIX
 
         SetFoodCursor();
         FindFirstObjectByType<FrogHoverRaycast>()?.RefreshHoverUI();
@@ -84,12 +85,19 @@ public class FoodManager : MonoBehaviour
     {
         var system = FindFirstObjectByType<FrogGiftSystem>();
 
-        if (system != null)
+        if (system == null)
+            return;
+
+        if (currentMode == FoodMode.Special && selectedFoodType != FrogType.None)
         {
             bool used = system.UseFood(selectedFoodType);
 
             if (!used)
-                Debug.Log("Failed to consume food");
+                Debug.Log("Failed to consume special food");
+        }
+        else
+        {
+            Debug.Log("Normal food used (no inventory consumed)");
         }
 
         ClearFood();
@@ -101,8 +109,10 @@ public class FoodManager : MonoBehaviour
     public void ClearFood()
     {
         isHoldingFood = false;
-        SetNormalCursor();
+        selectedFoodType = FrogType.None;
+        currentMode = FoodMode.Normal;
 
+        SetNormalCursor();
         FindFirstObjectByType<FrogHoverRaycast>()?.RefreshHoverUI();
     }
 
