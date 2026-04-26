@@ -10,10 +10,6 @@ public class FrogHoverRaycast : MonoBehaviour
 
     private FrogHoverUI currentUI;
 
-    public AudioSource popSound;
-    public AudioSource feedSound;
-    public AudioSource feedSpecialSound;
-
     void Update()
     {
         HandleHover();
@@ -106,7 +102,6 @@ public class FrogHoverRaycast : MonoBehaviour
         if (gift != null)
         {
             Debug.Log("Gift clicked");
-            popSound.Play();
             gift.Open();
             return;
         }
@@ -140,34 +135,23 @@ public class FrogHoverRaycast : MonoBehaviour
         }
 
         // =========================
-        // 🍖 FEEDING MODE (UPDATED)
+        // 🍖 FEEDING MODE (SIMPLIFIED)
         // =========================
         if (FoodManager.Instance != null && FoodManager.Instance.isHoldingFood)
         {
-            if (feeding != null && frog != null)
+            if (feeding != null)
             {
                 var manager = FoodManager.Instance;
 
-                Debug.Log($"[CLICK] Feeding frog: {frog.frogType}");
-                Debug.Log($"[MODE] {manager.currentMode}");
-                Debug.Log($"[SELECTED FOOD] {manager.selectedFoodType}");
+                FrogType foodType = manager.selectedFoodType;
 
-                if (manager.currentMode == FoodManager.FoodMode.Special)
-                {
-                    Debug.Log("👉 Using SPECIAL food");
+                Debug.Log($"[FEED CLICK] Frog: {frog?.frogType}");
+                Debug.Log($"[FOOD USED] {foodType}");
 
-                    feeding.FeedSpecial(manager.selectedFoodType);
-                    feedSpecialSound.Play();
-                }
-                else
-                {
-                    Debug.Log("👉 Using NORMAL food");
+                // ✅ ALWAYS use unified feed
+                feeding.Feed(foodType);
 
-                    feeding.Feed();
-                    feedSound.Play();
-                }
-
-                // consume food AFTER feeding
+                // consume AFTER feeding
                 manager.ConsumeSelectedFood();
 
                 return;

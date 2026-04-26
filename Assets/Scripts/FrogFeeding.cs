@@ -19,20 +19,17 @@ public class FrogFeeding : MonoBehaviour
 
     private Transform giftSpawnPoint;
 
-    // =========================
-    // 🍎 SPECIAL FOOD TRACKING (SINGLE TYPE ONLY)
-    // =========================
-    private FrogType lastSpecialFood = FrogType.None;
-    private int specialStreak = 0;
+    private FrogIdentity identity;
 
-    private const int specialLimit = 4;
-    private FrogSpecialFoodTracker tracker;
+    // 🧠 CYCLE TRACKING
+    private FrogType cycleFoodType = FrogType.None;
+    private bool isPerfectCycle = true;
 
     void Start()
     {
-        GameObject found = GameObject.Find(giftSpawnPointName);
+        identity = GetComponent<FrogIdentity>();
 
-        tracker = GetComponent<FrogSpecialFoodTracker>();
+        GameObject found = GameObject.Find(giftSpawnPointName);
 
         if (found != null)
             giftSpawnPoint = found.transform;
@@ -51,86 +48,70 @@ public class FrogFeeding : MonoBehaviour
     }
 
     // =========================
-    // 🍽 NORMAL FEEDING
+    // 🍽 UNIFIED FEED
     // =========================
-    public void Feed()
+    public void Feed(FrogType foodType)
     {
         if (!CanBeFed()) return;
 
         currentFeed++;
         OnFeedChanged?.Invoke();
 
+        Debug.Log($"[Feed] {name} got {foodType} ({currentFeed}/{maxFeed})");
+
+        TrackCycle(foodType);
+
         if (currentFeed >= maxFeed)
+        {
+            ResolveCycle();
+        }
+    }
+
+    // =========================
+    // 🧠 TRACK CYCLE
+    // =========================
+    void TrackCycle(FrogType foodType)
+    {
+        if (currentFeed == 1)
+        {
+            cycleFoodType = foodType;
+            isPerfectCycle = (foodType != FrogType.None);
+            return;
+        }
+
+        if (foodType != cycleFoodType || foodType == FrogType.None)
+        {
+            isPerfectCycle = false;
+        }
+    }
+
+    // =========================
+    // 🎯 RESOLVE RESULT
+    // =========================
+    void ResolveCycle()
+    {
+        bool unlocked = false;
+
+        if (isPerfectCycle && cycleFoodType != FrogType.None)
+        {
+            Debug.Log($"🔥 PERFECT CYCLE: {identity.frogType} + {cycleFoodType}");
+
+            if (FrogUnlockManager.Instance != null)
+            {
+                unlocked = FrogUnlockManager.Instance.TryUnlock(
+                    identity.frogType,
+                    cycleFoodType
+                );
+            }
+        }
+
+        // 🎁 fallback if no unlock
+        if (!unlocked)
         {
             SpawnGiftBox();
         }
-    }
 
-    // =========================
-    // 🍎 SPECIAL FOOD FEEDING (IMPORTANT RULE)
-    // =========================
-    public void FeedSpecial(FrogType type)
-    {
-        if (type == FrogType.None)
-            return;
-
-        FrogType frogType = GetComponent<FrogIdentity>().frogType;
-
-        // =========================
-        // 🎯 VALID COMBINATION RULES
-        // =========================
-        bool isValid =
-            (frogType == FrogType.AB && (type == FrogType.A || type == FrogType.B)) ||
-            (frogType == FrogType.AC && (type == FrogType.A || type == FrogType.C)) ||
-            (frogType == FrogType.BC && (type == FrogType.B || type == FrogType.C));
-
-        if (!isValid)
-        {
-            Debug.Log($"[Special Feed] {frogType} cannot accept {type}");
-            return;
-        }
-
-        // =========================
-        // 🔄 STREAK LOGIC
-        // =========================
-        if (type != lastSpecialFood)
-        {
-            lastSpecialFood = type;
-            specialStreak = 0;
-        }
-
-        specialStreak++;
-
-        Debug.Log($"[Special Feed] {frogType} got {type} = {specialStreak}/{specialLimit}");
-
-        if (specialStreak >= specialLimit)
-        {
-            Debug.Log($"🔥 SPECIAL FOOD {type} TRIGGERED ON {GetComponent<FrogIdentity>().frogType}");
-
-            FrogUnlockManager.Instance.TryUnlock(
-                GetComponent<FrogIdentity>().frogType,
-                type
-            );
-
-            specialStreak = 0;
-        }
-    }
-
-    // =========================
-    // 🎯 SPECIAL EVENT
-    // =========================
-    void TriggerSpecialEffect(FrogType type)
-    {
-        Debug.Log($"🔥 SPECIAL FOOD {type} REACHED 4 CONSECUTIVE FEEDS → SPECIAL EVENT TRIGGERED");
-
-        if (tracker != null)
-        {
-            tracker.AddFood(type);
-        }
-        else
-        {
-            Debug.LogWarning("[Special Feed] No FrogSpecialFoodTracker found!");
-        }
+        ResetFeed();
     }
 
     // =========================
@@ -152,9 +133,9 @@ public class FrogFeeding : MonoBehaviour
 
         FrogGiftBox gift = box.GetComponent<FrogGiftBox>();
         if (gift != null)
-            gift.Init(GetComponent<FrogIdentity>());
+            gift.Init(identity);
 
-        ResetFeed();
+        Debug.Log("[Feed] Gift spawned");
     }
 
     public int GetFeedCount() => currentFeed;
@@ -163,6 +144,10 @@ public class FrogFeeding : MonoBehaviour
     {
         currentFeed = 0;
         hasMated = false;
+
+        cycleFoodType = FrogType.None;
+        isPerfectCycle = true;
+
         OnFeedChanged?.Invoke();
     }
 }

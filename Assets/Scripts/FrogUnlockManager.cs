@@ -21,7 +21,7 @@ public class FrogUnlockManager : MonoBehaviour
         Instance = this;
     }
 
-    public void TryUnlock(FrogType frogType, FrogType foodType)
+    public bool TryUnlock(FrogType frogType, FrogType foodType)
     {
         foreach (var u in unlocks)
         {
@@ -40,7 +40,11 @@ public class FrogUnlockManager : MonoBehaviour
                 {
                     Debug.LogWarning("[UnlockManager] Missing target object!");
                 }
+
+                return true; // ✅ SUCCESS
             }
         }
+
+        return false; // ❌ nothing unlocked
     }
 }
