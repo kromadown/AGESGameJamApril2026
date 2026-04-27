@@ -10,6 +10,9 @@ public class FrogHoverRaycast : MonoBehaviour
 
     private FrogHoverUI currentUI;
 
+    public AudioSource popSound;
+    public AudioSource feedSound;
+
     void Update()
     {
         HandleHover();
@@ -103,6 +106,8 @@ public class FrogHoverRaycast : MonoBehaviour
         {
             Debug.Log("Gift clicked");
             gift.Open();
+            popSound.pitch = Random.Range(0.95f, 1.05f);
+            popSound.PlayOneShot(popSound.clip);
             return;
         }
 
@@ -147,6 +152,9 @@ public class FrogHoverRaycast : MonoBehaviour
 
                 Debug.Log($"[FEED CLICK] Frog: {frog?.frogType}");
                 Debug.Log($"[FOOD USED] {foodType}");
+
+                feedSound.pitch = Random.Range(0.95f, 1.05f);
+                feedSound.PlayOneShot(feedSound.clip);
 
                 // ✅ ALWAYS use unified feed
                 feeding.Feed(foodType);
