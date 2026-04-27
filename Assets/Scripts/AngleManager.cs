@@ -20,7 +20,9 @@ public class UIManager : MonoBehaviour
     public Button tutorialCheck;
     public Image tutorial;
     public Image mateTutorial;
-    public Button mateTutotialCheck;
+    public Button mateTutorialCheck;
+    public Image favourTutorial;
+    public Button favourTutorialCheck;
 
     public Image tutorial1;
     public Image tutorial2;
@@ -51,6 +53,7 @@ public class UIManager : MonoBehaviour
         tutorialReminder.interactable = false;
 
         mateTutorial.gameObject.SetActive(false);
+        favourTutorial.gameObject.SetActive(false);
 
         tutorial1.gameObject.SetActive(false);
         tutorial2.gameObject.SetActive(false);
@@ -61,9 +64,22 @@ public class UIManager : MonoBehaviour
     void TutorialCheck()
     {
         tutorial.gameObject.SetActive(false);
+
+        favourTutorial.gameObject.SetActive(true);
+        favourTutorialCheck.onClick.AddListener(FavourTutorialCheck);
+        //mateTutorial.gameObject.SetActive(true);
+        //mateTutotialCheck.onClick.AddListener(MateTutorialCheck);
+
+        buttonSound.Play();
+    }
+
+    void FavourTutorialCheck()
+    {
+        favourTutorial.gameObject.SetActive(false);
+
         mateTutorial.gameObject.SetActive(true);
-        mateTutotialCheck.onClick.AddListener(MateTutorialCheck);
-        
+        mateTutorialCheck.onClick.AddListener(MateTutorialCheck);
+
         buttonSound.Play();
     }
 

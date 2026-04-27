@@ -7,6 +7,10 @@ public class FoodButtonUI : MonoBehaviour
     public FrogType type;
     public Button button;
     public TextMeshProUGUI countText;
+    public Animator uIAnimA;
+    public Animator uIAnimB;
+    public Animator uIAnimC;
+    public AudioSource specialFoodGet;
 
     void Update()
     {
@@ -16,6 +20,30 @@ public class FoodButtonUI : MonoBehaviour
         int count = system.GetFoodCount(type);
         int max = system.maxSpecialFood; // ✅ get limit
 
+        if (system.getSpecialFoodA & uIAnimA != null)
+        {
+            uIAnimA.SetTrigger("foodUiAnim");
+            specialFoodGet.pitch = Random.Range(0.9f, 1.1f);
+            specialFoodGet.PlayOneShot(specialFoodGet.clip);
+            system.getSpecialFoodA = false;
+        }
+
+        if (system.getSpecialFoodB & uIAnimB != null)
+        {
+            uIAnimB.SetTrigger("foodUiAnim");
+            specialFoodGet.pitch = Random.Range(0.9f, 1.1f);
+            specialFoodGet.PlayOneShot(specialFoodGet.clip);
+            system.getSpecialFoodB = false;
+        }
+
+        if (system.getSpecialFoodC & uIAnimC != null)
+        {
+            uIAnimC.SetTrigger("foodUiAnim");
+            specialFoodGet.pitch = Random.Range(0.9f, 1.1f);
+            specialFoodGet.PlayOneShot(specialFoodGet.clip);
+            system.getSpecialFoodC = false;
+        }
+
         // Enable / disable button
         button.interactable = count > 0;
 
@@ -24,5 +52,6 @@ public class FoodButtonUI : MonoBehaviour
         {
             countText.text = $"{count}/{max}";
         }
+
     }
 }

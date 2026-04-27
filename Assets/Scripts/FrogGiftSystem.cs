@@ -23,6 +23,10 @@ public class FrogGiftSystem : MonoBehaviour
     private int foodB = 0;
     private int foodC = 0;
 
+    [HideInInspector] public bool getSpecialFoodA = false;
+    [HideInInspector] public bool getSpecialFoodB = false;
+    [HideInInspector] public bool getSpecialFoodC = false;
+
     // =========================
     // 🎁 MAIN GIFT LOGIC
     // =========================
@@ -144,6 +148,7 @@ public class FrogGiftSystem : MonoBehaviour
             if (r == 0 && foodA < maxSpecialFood)
             {
                 foodA++;
+                getSpecialFoodA = true;
                 Debug.Log($"[GiftSystem] Special Food A ({foodA}/{maxSpecialFood})");
                 return true;
             }
@@ -151,6 +156,7 @@ public class FrogGiftSystem : MonoBehaviour
             if (r == 1 && foodB < maxSpecialFood)
             {
                 foodB++;
+                getSpecialFoodB = true;
                 Debug.Log($"[GiftSystem] Special Food B ({foodB}/{maxSpecialFood})");
                 return true;
             }
@@ -158,6 +164,7 @@ public class FrogGiftSystem : MonoBehaviour
             if (r == 2 && foodC < maxSpecialFood)
             {
                 foodC++;
+                getSpecialFoodC = true;
                 Debug.Log($"[GiftSystem] Special Food C ({foodC}/{maxSpecialFood})");
                 return true;
             }
